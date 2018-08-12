@@ -30,6 +30,8 @@ namespace myserver.game
         public bool Aim { get; set; } = false;
         public bool Run { get; set; } = false;
 
+        public bool Crouch { get; set; } = false;
+
         // Dictionary to hold new state and actions from client - these we broadcast from server to all clients
         public Dictionary<int, int> NewPsaKeyValue = new Dictionary<int, int>();
 

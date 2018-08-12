@@ -68,6 +68,7 @@ namespace myserver.game
                     else
                     {
                         // send correction package to player
+                        // todo
                         returnString = "5001;2:" + player.PositionX + ",3:" + player.PositionY + ",4:" + player.PositionZ;
                     }
                 }

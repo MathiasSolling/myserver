@@ -21,6 +21,13 @@ namespace myserver.game
         Jump = 8,
         Shoot = 9,
         Aim = 10,
-        Run = 11
+        Run = 11,
+
+        W = 12,
+        S = 13,
+        A = 14,
+        D = 15,
+
+        Crouch = 16
     }
 }

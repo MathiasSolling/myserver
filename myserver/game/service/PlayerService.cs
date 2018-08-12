@@ -95,6 +95,26 @@ namespace myserver.game
                                 player.Run = psaValue == 1;
                                 break;
 
+                            case PlayerStateActionEnum.W:
+                                player.W = psaValue == 1;
+                                break;
+
+                            case PlayerStateActionEnum.S:
+                                player.S = psaValue == 1;
+                                break;
+
+                            case PlayerStateActionEnum.A:
+                                player.A = psaValue == 1;
+                                break;
+
+                            case PlayerStateActionEnum.D:
+                                player.D = psaValue == 1;
+                                break;
+
+                            case PlayerStateActionEnum.Crouch:
+                                player.Crouch = psaValue == 1;
+                                break;
+
                             default:
                                 break;
                         }
