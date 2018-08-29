@@ -23,9 +23,10 @@ namespace myserver.game
             Console.WriteLine("Listening to clients");
 
             // Thread to listen for incomming messages
-            udpListener = new UdpListener(new IPEndPoint(IPAddress.Any, 9601));
-            Thread listenerThread = new Thread(() => udpListener.Listen());
-            listenerThread.Start();
+            udpListener = new UdpListener();
+            //Thread listenerThread = new Thread(() => udpListener.Listen());
+            //listenerThread.Start();
+            udpListener.Listen();
 
 
             // Thread to process the incomming messages (Since network is faster than actual execution of code)

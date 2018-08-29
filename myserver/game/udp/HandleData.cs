@@ -11,6 +11,8 @@ namespace myserver
     {
         GameControlCenter gameControlCenter;
 
+        private UdpClient sender = new UdpClient();
+
         public HandleData(GameControlCenter gameControlCenter)
         {
             this.gameControlCenter = gameControlCenter;
@@ -21,7 +23,7 @@ namespace myserver
             udpListener.DataReceivedEvent += listener_DataReceivedEvent;
         }
 
-        void listener_DataReceivedEvent(UdpClient sender, ReceivedDataArgs args)
+        void listener_DataReceivedEvent(ReceivedDataArgs args)
         {
             string message = Encoding.ASCII.GetString(args.ReceivedBytes);
             Console.WriteLine("Received message from: " + args.IpAddress.ToString() + ", Port: " + args.Port.ToString() + ", Message: " + message);

@@ -13,13 +13,18 @@ namespace myserver.game
             bool playerNeedsCorrection = false;
             foreach (var package in packageArray)
             {
-                string[] packageSplit = package.Split(',');
-                // packages should(might be malicious) contain an Integer representing PlayerStateActionEnum followed by ':' then value
+                string[] actionsArray = package.Split(',');
+                // packages should (might be malicious) contain an Integer representing PlayerStateActionEnum followed by ':' then value
                 // we know the first packageSplit should be package sequence number but make sure!
-                PlayerStateActionEnum psa = (PlayerStateActionEnum)Int32.Parse(packageSplit[0].Split(':')[0]);
+                string[] sequenceNumber = actionsArray[0].Split(':');
+                if (sequenceNumber.Length != 2)
+                {
+                    break;
+                }
+                PlayerStateActionEnum psa = (PlayerStateActionEnum)Int32.Parse(sequenceNumber[0]);
                 if (psa == PlayerStateActionEnum.PackageSeqNum)
                 {
-                    int receivedPackageSeqNum = Int32.Parse(packageSplit[0].Split(':')[1]);
+                    int receivedPackageSeqNum = Int32.Parse(sequenceNumber[1]);
                     int expectedPackageSeqNum = player.PackageSeq + 1;
                     if (receivedPackageSeqNum != expectedPackageSeqNum && receivedPackageSeqNum - 64 < expectedPackageSeqNum)
                     {
@@ -43,85 +48,94 @@ namespace myserver.game
                     break;
                 }
 
-                foreach (var action in packageSplit)
+                foreach (var action in actionsArray)
                 {
-                    string[] actionKeyValue = action.Split(':');
-                    int psaKey = Int32.Parse(actionKeyValue[0]);
-                    int psaValue = Int32.Parse(actionKeyValue[1]);
-
-                    PlayerStateActionEnum psaEnum = (PlayerStateActionEnum)psaKey;
-                    if (psaEnum != PlayerStateActionEnum.PackageSeqNum && psaEnum != PlayerStateActionEnum.PlayerId)
-                    {
-                        player.NewPsaKeyValue[psaKey] = psaValue;
-                        switch (psaEnum)
-                        {
-                            case PlayerStateActionEnum.PosX:
-                                player.PositionX = psaValue;
-                                break;
-
-                            case PlayerStateActionEnum.PosY:
-                                player.PositionY = psaValue;
-                                break;
-
-                            case PlayerStateActionEnum.PosZ:
-                                player.PositionZ = psaValue;
-                                break;
-
-                            case PlayerStateActionEnum.RotX:
-                                player.RotationX = psaValue;
-                                break;
-
-                            case PlayerStateActionEnum.RotY:
-                                player.RotationY = psaValue;
-                                break;
-
-                            case PlayerStateActionEnum.RotZ:
-                                player.RotationZ = psaValue;
-                                break;
-
-                            case PlayerStateActionEnum.Jump:
-                                player.Jump = psaValue == 1;
-                                break;
-
-                            case PlayerStateActionEnum.Shoot:
-                                player.Shoot = psaValue == 1;
-                                break;
-
-                            case PlayerStateActionEnum.Aim:
-                                player.Aim = psaValue == 1;
-                                break;
-
-                            case PlayerStateActionEnum.Run:
-                                player.Run = psaValue == 1;
-                                break;
-
-                            case PlayerStateActionEnum.W:
-                                player.W = psaValue == 1;
-                                break;
-
-                            case PlayerStateActionEnum.S:
-                                player.S = psaValue == 1;
-                                break;
-
-                            case PlayerStateActionEnum.A:
-                                player.A = psaValue == 1;
-                                break;
-
-                            case PlayerStateActionEnum.D:
-                                player.D = psaValue == 1;
-                                break;
-
-                            case PlayerStateActionEnum.Crouch:
-                                player.Crouch = psaValue == 1;
-                                break;
-
-                            default:
-                                break;
-                        }
-                    }
+                    UpdatePlayer(player, action);
                 }
             }
             return playerNeedsCorrection;
+        }
+
+        private void UpdatePlayer(Player player, string action)
+        {
+            string[] actionKeyValue = action.Split(':');
+            if (actionKeyValue.Length != 2)
+            {
+                return;
+            }
+            int psaKey = Int32.Parse(actionKeyValue[0]);
+            int psaValue = Int32.Parse(actionKeyValue[1]);
+
+            PlayerStateActionEnum psaEnum = (PlayerStateActionEnum)psaKey;
+            if (psaEnum != PlayerStateActionEnum.PackageSeqNum && psaEnum != PlayerStateActionEnum.PlayerId)
+            {
+                player.NewPsaKeyValue[psaKey] = psaValue;
+                switch (psaEnum)
+                {
+                    case PlayerStateActionEnum.PosX:
+                        player.PositionX = psaValue;
+                        break;
+
+                    case PlayerStateActionEnum.PosY:
+                        player.PositionY = psaValue;
+                        break;
+
+                    case PlayerStateActionEnum.PosZ:
+                        player.PositionZ = psaValue;
+                        break;
+
+                    case PlayerStateActionEnum.RotX:
+                        player.RotationX = psaValue;
+                        break;
+
+                    case PlayerStateActionEnum.RotY:
+                        player.RotationY = psaValue;
+                        break;
+
+                    case PlayerStateActionEnum.RotZ:
+                        player.RotationZ = psaValue;
+                        break;
+
+                    case PlayerStateActionEnum.Jump:
+                        player.Jump = psaValue == 1;
+                        break;
+
+                    case PlayerStateActionEnum.Shoot:
+                        player.Shoot = psaValue == 1;
+                        break;
+
+                    case PlayerStateActionEnum.Aim:
+                        player.Aim = psaValue == 1;
+                        break;
+
+                    case PlayerStateActionEnum.Run:
+                        player.Run = psaValue == 1;
+                        break;
+
+                    case PlayerStateActionEnum.W:
+                        player.W = psaValue == 1;
+                        break;
+
+                    case PlayerStateActionEnum.S:
+                        player.S = psaValue == 1;
+                        break;
+
+                    case PlayerStateActionEnum.A:
+                        player.A = psaValue == 1;
+                        break;
+
+                    case PlayerStateActionEnum.D:
+                        player.D = psaValue == 1;
+                        break;
+
+                    case PlayerStateActionEnum.Crouch:
+                        player.Crouch = psaValue == 1;
+                        break;
+
+                    default:
+                        break;
+                }
+            }
         }
 
         public String RetrieveNewPlayerState(Player player)
@@ -134,6 +148,11 @@ namespace myserver.game
                 {
                     playerState += "," + entry.Key + ":" + entry.Value;
                 }
+            }
+            else
+            {
+                // This is just to test instantiation
+                // playerState = ";" + player.PlayerId + ",8:1";
             }
             player.NewPsaKeyValue.Clear();
             return playerState;

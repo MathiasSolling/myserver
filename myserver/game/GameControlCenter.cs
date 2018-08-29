@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -11,14 +12,16 @@ namespace myserver.game
     class GameControlCenter
     {
         private int GameId { get; set; }
-        public List<Player> Players { get; set; }
+        public ConcurrentBag<Player> Players { get; set; }
 
         private PlayerService playerService = new PlayerService();
+
+        private UdpClient udpClient = new UdpClient();
         
         public GameControlCenter(int gameId)
         {
             this.GameId = gameId;
-            Players = new List<Player>();
+            Players = new ConcurrentBag<Player>();
         }
 
         public void DoGameLogic(double deltaTime)
@@ -29,7 +32,8 @@ namespace myserver.game
 
         public void CalculateMovements(double deltaTime)
         {
-            // Am I ever gonna do this?
+            // Check to spwan zombies // hold a timestamp on each player and if 10 seconds has passed spawn a zombie close to them
+            // If zombie doesnt have a target close enough tell client's that it's wandering around randomly
         }
 
         public void CalculatePhysics()
@@ -53,8 +57,14 @@ namespace myserver.game
             int pId = Int32.Parse(messageSplit[1]);
             // Skipping first which is message type (001 player state) and second which is pId
             string[] packageArray = messageSplit.Skip(2).ToArray();
-            // So now we should just have a list of packages
+
             string returnString = "-1";
+            if (packageArray.Length == 0)
+            {
+                Console.WriteLine("Missing actions in UpdatePlayerState!");
+                return returnString;
+            }
+            // So now we should just have a list of packages
             foreach (var player in Players)
             {
                 if (player.PlayerId == pId)
@@ -69,7 +79,7 @@ namespace myserver.game
                     {
                         // send correction package to player
                         // todo
-                        returnString = "5001;2:" + player.PositionX + ",3:" + player.PositionY + ",4:" + player.PositionZ;
+                        returnString = "e001;2:" + player.PositionX + ",3:" + player.PositionY + ",4:" + player.PositionZ;
                     }
                 }
             }
@@ -78,40 +88,29 @@ namespace myserver.game
 
         public string ConstructAllPlayerPostitions()
         {
-            string playerPostitions = "";
+            string playerPositions = "";
             foreach (var player in Players)
             {
-                playerPostitions += playerService.RetrieveNewPlayerState(player);
+                playerPositions += playerService.RetrieveNewPlayerState(player);
             }
-            return playerPostitions;
+            // Below is for testing purpose when only 1 player on server
+            // playerPositions += ";1,8:1";
+            return playerPositions;
         }
 
         public void BroadcastGameState()
         {
-            UdpClient udpClient = new UdpClient();
             string constructedPlayerPositions = ConstructAllPlayerPostitions();
             // Dont broadcast anything if there is nothing to broadcast
             if (constructedPlayerPositions.Length != 0)
             {
                 string playerPositions = "002" + constructedPlayerPositions;
-                Console.WriteLine("BroadcastGameState => " + playerPositions);
+                Console.WriteLine("BroadcastGameState ===> " + playerPositions);
                 var dg = Encoding.ASCII.GetBytes(playerPositions);
                 foreach (var player in Players)
                 {
                     udpClient.Send(dg, dg.Length, player.Ep);
                 }
-            }
-        }
-
-        private int BoolToInt(bool isTrue)
-        {
-            if (isTrue)
-            {
-                return 1;
-            }
-            else
-            {
-                return 0;
             }
         }
     }

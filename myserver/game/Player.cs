@@ -39,7 +39,7 @@ namespace myserver.game
         public long LastTimeShotFiredInMillis { get; set; } = 0;
 
         [JsonIgnore]
-        public int PackageSeq { get; set; } = 0;
+        public int PackageSeq { get; set; } = 1;
 
         [JsonIgnore]
         public IPEndPoint Ep { get; set; }

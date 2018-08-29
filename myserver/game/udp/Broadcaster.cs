@@ -14,7 +14,7 @@ namespace myserver.game.udp
 
         // Amount of time between each broadcast 
         // Usally 50 which is 20 times a second, for development 2000 is good which is once every 2 seconds
-        private long timeInMillisBeforeBroadcastingAgain = 45;
+        private long timeInMillisBeforeBroadcastingAgain = 25;
 
         private long timeLastIterationInMillis = DateTimeOffset.Now.ToUnixTimeMilliseconds();
         private long timeStartedCountingTicksInMillis = DateTimeOffset.Now.ToUnixTimeMilliseconds();
