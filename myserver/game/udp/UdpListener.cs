@@ -22,8 +22,9 @@ namespace myserver
 
         public UdpListener()
         {
+
             s = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            s.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.PacketInformation, true);
+            s.SetSocketOption(SocketOptionLevel.Udp, SocketOptionName.PacketInformation, true);
             s.Bind(new IPEndPoint(IPAddress.Any, 36200));
             // udpClient = new UdpClient(36200);
             // Don't throw exception if connection to a client has been lost
@@ -35,7 +36,7 @@ namespace myserver
             try
             {
                 //udpClient.BeginReceive(new AsyncCallback(Recv), null);
-                EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
+                EndPoint remoteEndPoint = (EndPoint)new IPEndPoint(IPAddress.Any, 0);
                 s.BeginReceiveMessageFrom(ReceiveBuffer, 0, ReceiveBuffer.Length, SocketFlags.None, ref remoteEndPoint, Recv, s);
             }
             catch (Exception e)
@@ -56,25 +57,25 @@ namespace myserver
 
                 Socket receiveSocket = (Socket)res.AsyncState;
 
-                EndPoint clientEndPoint = new IPEndPoint(IPAddress.Any, 0);
+                IPEndPoint clientEndPoint = new IPEndPoint(IPAddress.Any, 0);
+                EndPoint ep = (EndPoint) clientEndPoint;
                 IPPacketInformation packetInfo;
                 SocketFlags flags = SocketFlags.None;
-                int udpMessageLength = receiveSocket.EndReceiveMessageFrom(res, ref flags, ref clientEndPoint, out packetInfo);
+                int udpMessageLength = receiveSocket.EndReceiveMessageFrom(res, ref flags, ref ep, out packetInfo);
                 byte[] udpMessage = new byte[udpMessageLength];
                 Array.Copy(ReceiveBuffer, udpMessage, udpMessageLength);
 
                 Console.WriteLine(
                     "{0} bytes received from {1} to {2}",
                     ReceiveBuffer,
-                    clientEndPoint,
+                    ep,
                     packetInfo.Address
                 );
-
-                EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, ((IPEndPoint)receiveSocket.LocalEndPoint).Port);
-                s.BeginReceiveMessageFrom(ReceiveBuffer, 0, ReceiveBuffer.Length, SocketFlags.None, ref remoteEndPoint, Recv, s);
+                
+                s.BeginReceiveMessageFrom(ReceiveBuffer, 0, ReceiveBuffer.Length, SocketFlags.None, ref ep, Recv, s);
 
                 //Process codes
-                RaiseDataReceived(new ReceivedDataArgs(packetInfo.Address, ((IPEndPoint)clientEndPoint).Port, udpMessage));
+                RaiseDataReceived(new ReceivedDataArgs(((IPEndPoint)ep).Address, ((IPEndPoint)ep).Port, udpMessage));
             }
             catch (Exception e)
             {
