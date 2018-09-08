@@ -43,6 +43,14 @@ namespace myserver.game
 
         public int AddNewPlayer(IPEndPoint ep)
         {
+            foreach (var player in Players)
+            {
+                if (ep.Address.ToString() == player.Ep.Address.ToString() && ep.Port == player.Ep.Port)
+                {
+                    // Player already got an ID
+                    return player.PlayerId;
+                }
+            }
             int newPlayerId = Players.Count() + 1;
             Player p = new Player(newPlayerId, 0, 3, 0, 0, 0, 0, ep);
             Players.Add(p);
@@ -109,6 +117,7 @@ namespace myserver.game
                 var dg = Encoding.ASCII.GetBytes(playerPositions);
                 foreach (var player in Players)
                 {
+                    Console.WriteLine(player.Ep.Address);
                     udpClient.Send(dg, dg.Length, player.Ep);
                 }
             }

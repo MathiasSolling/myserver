@@ -22,10 +22,8 @@ namespace myserver.game
             //create a new server
             Console.WriteLine("Listening to clients");
 
-            // Thread to listen for incomming messages
+            // listen for incomming messages
             udpListener = new UdpListener();
-            //Thread listenerThread = new Thread(() => udpListener.Listen());
-            //listenerThread.Start();
             udpListener.Listen();
 
 

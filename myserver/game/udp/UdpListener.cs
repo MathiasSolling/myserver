@@ -12,32 +12,25 @@ namespace myserver
 {
     public class UdpListener : IDisposable
     {
-        //UdpClient udpClient;
-        //public const int SIO_UDP_CONNRESET = -1744830452;
+        UdpClient udpClient;
+        public const int SIO_UDP_CONNRESET = -1744830452;
 
         private bool disposed = false;
 
-        private Socket s;
-        public byte[] ReceiveBuffer = new byte[2048];
+        IPEndPoint listenEP = new IPEndPoint(IPAddress.Any, 36200);
 
         public UdpListener()
         {
-
-            s = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            s.SetSocketOption(SocketOptionLevel.Udp, SocketOptionName.PacketInformation, true);
-            s.Bind(new IPEndPoint(IPAddress.Any, 36200));
-            // udpClient = new UdpClient(36200);
-            // Don't throw exception if connection to a client has been lost
-            // udpClient.Client.IOControl((IOControlCode)SIO_UDP_CONNRESET, new byte[] { 0, 0, 0, 0 }, null);
+            udpClient = new UdpClient(listenEP);
+            //Don't throw exception if connection to a client has been lost
+            udpClient.Client.IOControl((IOControlCode)SIO_UDP_CONNRESET, new byte[] { 0, 0, 0, 0 }, null);
         }
 
         public void Listen()
         {
             try
             {
-                //udpClient.BeginReceive(new AsyncCallback(Recv), null);
-                EndPoint remoteEndPoint = (EndPoint)new IPEndPoint(IPAddress.Any, 0);
-                s.BeginReceiveMessageFrom(ReceiveBuffer, 0, ReceiveBuffer.Length, SocketFlags.None, ref remoteEndPoint, Recv, s);
+                udpClient.BeginReceive(new AsyncCallback(DetectionCallback), udpClient);
             }
             catch (Exception e)
             {
@@ -46,36 +39,19 @@ namespace myserver
             }
         }
 
-        private void Recv(IAsyncResult res)
+        private void DetectionCallback(IAsyncResult res)
         {
-            //IPEndPoint clientEndPoint = new IPEndPoint(IPAddress.Any, 0);
-
             try
             {
-                //byte[] data = udpClient.EndReceive(res, ref clientEndPoint);
-                //udpClient.BeginReceive(new AsyncCallback(Recv), null);
+                var client = (res.AsyncState as UdpClient);
+                if (client.Client == null) return;
 
-                Socket receiveSocket = (Socket)res.AsyncState;
-
-                IPEndPoint clientEndPoint = new IPEndPoint(IPAddress.Any, 0);
-                EndPoint ep = (EndPoint) clientEndPoint;
-                IPPacketInformation packetInfo;
-                SocketFlags flags = SocketFlags.None;
-                int udpMessageLength = receiveSocket.EndReceiveMessageFrom(res, ref flags, ref ep, out packetInfo);
-                byte[] udpMessage = new byte[udpMessageLength];
-                Array.Copy(ReceiveBuffer, udpMessage, udpMessageLength);
-
-                Console.WriteLine(
-                    "{0} bytes received from {1} to {2}",
-                    ReceiveBuffer,
-                    ep,
-                    packetInfo.Address
-                );
-                
-                s.BeginReceiveMessageFrom(ReceiveBuffer, 0, ReceiveBuffer.Length, SocketFlags.None, ref ep, Recv, s);
+                var endPoint = new IPEndPoint(IPAddress.Any, 0);
+                byte[] data = client.EndReceive(res, ref endPoint);
+                udpClient.BeginReceive(new AsyncCallback(DetectionCallback), client);
 
                 //Process codes
-                RaiseDataReceived(new ReceivedDataArgs(((IPEndPoint)ep).Address, ((IPEndPoint)ep).Port, udpMessage));
+                RaiseDataReceived(new ReceivedDataArgs(endPoint.Address, endPoint.Port, data));
             }
             catch (Exception e)
             {
