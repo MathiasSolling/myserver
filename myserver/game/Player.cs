@@ -32,6 +32,11 @@ namespace myserver.game
 
         public bool Crouch { get; set; } = false;
 
+        public int Health = 500;
+
+        public HashSet<WeaponEnum> availableWeapons = new HashSet<WeaponEnum> { WeaponEnum.NoWeapon };
+        public WeaponEnum activeWeapon = WeaponEnum.NoWeapon;
+
         // Dictionary to hold new state and actions from client - these we broadcast from server to all clients
         public Dictionary<int, int> NewPsaKeyValue = new Dictionary<int, int>();
 

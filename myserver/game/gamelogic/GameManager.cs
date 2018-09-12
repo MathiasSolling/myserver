@@ -9,18 +9,19 @@ using System.Text;
 
 namespace myserver.game
 {
-    class GameControlCenter
+    class GameManager
     {
         private int GameId { get; set; }
         public ConcurrentBag<Player> Players { get; set; }
 
         private PlayerService playerService = new PlayerService();
 
-        private UdpClient udpClient = new UdpClient();
+        private UdpClient udpClient;
         
-        public GameControlCenter(int gameId)
+        public GameManager(int gameId, UdpClient udpClient)
         {
             this.GameId = gameId;
+            this.udpClient = udpClient;
             Players = new ConcurrentBag<Player>();
         }
 

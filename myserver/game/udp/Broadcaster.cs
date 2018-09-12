@@ -10,7 +10,7 @@ namespace myserver.game.udp
     class Broadcaster
     {
 
-        private GameControlCenter gameControlCenter;
+        private GameManager gameManager;
 
         // Amount of time between each broadcast 
         // Usally 50 which is 20 times a second, for development 2000 is good which is once every 2 seconds
@@ -20,9 +20,9 @@ namespace myserver.game.udp
         private long timeStartedCountingTicksInMillis = DateTimeOffset.Now.ToUnixTimeMilliseconds();
         private int broadcastCount = 0;
 
-        public Broadcaster(GameControlCenter gameControlCenter)
+        public Broadcaster(GameManager gameManager)
         {
-            this.gameControlCenter = gameControlCenter;
+            this.gameManager = gameManager;
         }
 
         public void BroadcastGameState()
@@ -35,8 +35,9 @@ namespace myserver.game.udp
                 {
                     double deltaTime = (timeNowInMillis - timeLastIterationInMillis) / 1000;
                     // Now broadcast gamestate to all players
-                    // gameControlCenter.DoGameLogic(deltaTime);
-                    gameControlCenter.BroadcastGameState();
+                    gameManager.BroadcastGameState();
+                    // Do game logic after broadcast so it doesnt block broadcast on time
+                    gameManager.DoGameLogic(deltaTime);
 
                     timeLastIterationInMillis = timeNowInMillis;
 

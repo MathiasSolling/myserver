@@ -12,24 +12,23 @@ namespace myserver
 {
     public class UdpListener : IDisposable
     {
-        UdpClient udpClient;
+        private UdpClient udpClient;
         public const int SIO_UDP_CONNRESET = -1744830452;
 
         private bool disposed = false;
 
-        IPEndPoint listenEP = new IPEndPoint(IPAddress.Any, 36200);
-
-        public UdpListener()
+        public UdpListener(UdpClient udpClient)
         {
-            udpClient = new UdpClient(listenEP);
+            this.udpClient = udpClient;
             //Don't throw exception if connection to a client has been lost
-            udpClient.Client.IOControl((IOControlCode)SIO_UDP_CONNRESET, new byte[] { 0, 0, 0, 0 }, null);
+            this.udpClient.Client.IOControl((IOControlCode)SIO_UDP_CONNRESET, new byte[] { 0, 0, 0, 0 }, null);
         }
 
         public void Listen()
         {
             try
             {
+                Console.WriteLine("Meep-Mop listening for UDP messages...");
                 udpClient.BeginReceive(new AsyncCallback(DetectionCallback), udpClient);
             }
             catch (Exception e)
@@ -51,7 +50,7 @@ namespace myserver
                 udpClient.BeginReceive(new AsyncCallback(DetectionCallback), client);
 
                 //Process codes
-                RaiseDataReceived(new ReceivedDataArgs(endPoint.Address, endPoint.Port, data));
+                RaiseDataReceived(udpClient, new ReceivedDataArgs(endPoint.Address, endPoint.Port, data));
             }
             catch (Exception e)
             {
@@ -60,13 +59,13 @@ namespace myserver
             }
         }
 
-        public delegate void DataReceived(ReceivedDataArgs args);
+        public delegate void DataReceived(UdpClient udpClient, ReceivedDataArgs args);
 
         public event DataReceived DataReceivedEvent;
 
-        private void RaiseDataReceived(ReceivedDataArgs args)
+        private void RaiseDataReceived(UdpClient udpClient, ReceivedDataArgs args)
         {
-            DataReceivedEvent?.Invoke(args);
+            DataReceivedEvent?.Invoke(udpClient, args);
         }
 
         public void Dispose()

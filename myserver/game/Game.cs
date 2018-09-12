@@ -1,6 +1,8 @@
-﻿using myserver.game.udp;
+﻿using myserver.game.tcp;
+using myserver.game.udp;
 using System;
 using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 
 namespace myserver.game
@@ -8,32 +10,45 @@ namespace myserver.game
     public class Game : IDisposable
     {
         private UdpListener udpListener;
-        private GameControlCenter gameControlCenter = new GameControlCenter(1);
+
+        private UdpClient udpClient;
+        private TcpServer tcpServer;
+        private GameManager gameManager;
+
+        private int UdpPort = 36200;
+        private int TcpPort = 36100;
 
         private bool disposed = false;
 
         public Game()
         {
+            udpClient = new UdpClient(new IPEndPoint(IPAddress.Any, UdpPort));
+            gameManager = new GameManager(1, udpClient);
+
             StartUdpServer();
+            StartTcpServer();
+        }
+
+        void StartTcpServer()
+        {
+            tcpServer = new TcpServer(gameManager, TcpPort);
+            tcpServer.StartListening();
         }
 
         void StartUdpServer()
         {
-            //create a new server
-            Console.WriteLine("Listening to clients");
-
             // listen for incomming messages
-            udpListener = new UdpListener();
+            udpListener = new UdpListener(udpClient);
             udpListener.Listen();
 
 
             // Thread to process the incomming messages (Since network is faster than actual execution of code)
-            HandleData handleData = new HandleData(gameControlCenter);
+            HandleData handleData = new HandleData(gameManager);
             Thread handleDataThread = new Thread(() => handleData.subscribeToEvent(udpListener));
             handleDataThread.Start();
 
             // Thread to broadcast gamestate to all players in a fixed interval
-            Broadcaster broadCaster = new Broadcaster(gameControlCenter);
+            Broadcaster broadCaster = new Broadcaster(gameManager);
             Thread broadcasterThread = new Thread(() => broadCaster.BroadcastGameState());
             broadcasterThread.Start();
         }
