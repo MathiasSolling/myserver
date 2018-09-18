@@ -63,15 +63,20 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="game\enum\EnumUtil.cs" />
     <Compile Include="game\enum\PlayerStateActionEnum.cs" />
-    <Compile Include="game\enum\WeaponEnum.cs" />
+    <Compile Include="game\service\BaseSpawnArea.cs" />
     <Compile Include="game\service\PlayerService.cs" />
     <Compile Include="game\gamelogic\GameManager.cs" />
     <Compile Include="game\Game.cs" />
     <Compile Include="game\Player.cs" />
+    <Compile Include="game\service\weapon\Weapon.cs" />
+    <Compile Include="game\service\weapon\WeaponBase.cs" />
+    <Compile Include="game\service\weapon\WeaponService.cs" />
+    <Compile Include="game\service\weapon\WeaponSpawnArea.cs" />
     <Compile Include="game\tcp\TcpServer.cs" />
     <Compile Include="game\udp\Broadcaster.cs" />
     <Compile Include="game\udp\ReceivedDataArgs.cs" />

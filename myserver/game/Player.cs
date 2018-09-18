@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using myserver.game.service.weapon;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,8 +35,11 @@ namespace myserver.game
 
         public int Health = 500;
 
-        public HashSet<WeaponEnum> availableWeapons = new HashSet<WeaponEnum> { WeaponEnum.NoWeapon };
-        public WeaponEnum activeWeapon = WeaponEnum.NoWeapon;
+        public List<Weapon> Weapons = new List<Weapon>();
+        public Weapon ActiveWeapon;
+
+        public int DamageDealtToNpc = 0;
+        public int DamageDealtToPlayers = 0;
 
         // Dictionary to hold new state and actions from client - these we broadcast from server to all clients
         public Dictionary<int, int> NewPsaKeyValue = new Dictionary<int, int>();

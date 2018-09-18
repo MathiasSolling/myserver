@@ -7,7 +7,7 @@ using System.Threading;
 namespace myserver.game.tcp
 {
     // State object for reading client data asynchronously  
-    public class StateObject
+    class StateObject
     {
         // Client  socket.  
         public Socket workSocket = null;
@@ -19,7 +19,7 @@ namespace myserver.game.tcp
         public StringBuilder sb = new StringBuilder();
     }
 
-    public class TcpServer
+    class TcpServer
     {
         private GameManager gameManager;
 
@@ -42,7 +42,7 @@ namespace myserver.game.tcp
             // running the listener is "host.contoso.com".  
             IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
             IPAddress ipAddress = ipHostInfo.AddressList[0];
-            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, _tcpPort);
+            IPEndPoint localEndPoint = new IPEndPoint(address: ipAddress, port: tcpPort);
 
             // Create a TCP/IP socket.  
             Socket listener = new Socket(ipAddress.AddressFamily,
