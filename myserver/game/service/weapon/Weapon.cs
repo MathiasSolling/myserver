@@ -6,9 +6,13 @@ using System.Threading.Tasks;
 
 namespace myserver.game.service.weapon
 {
-    class Weapon : WeaponBase
+    class Weapon
     {
         public int WeaponId;
+
+        public WeaponType WeaponType;
+
+        public int BulletsInMag;
 
         public int WeaponPosX;
         public int WeaponPosY;
@@ -16,9 +20,13 @@ namespace myserver.game.service.weapon
 
         public bool PickedUp = false;
 
-        public Weapon(string weaponName, int damage, int fireSpeed, bool enabled) : base(weaponName,  damage, fireSpeed, enabled)
+        public Weapon(int weaponId, WeaponType weaponType, int BulletsInMag, int x, int y, int z)
         {
-
+            this.WeaponId = weaponId;
+            this.WeaponType = weaponType;
+            this.WeaponPosX = x;
+            this.WeaponPosY = y;
+            this.WeaponPosZ = z;
         }
     }
 }

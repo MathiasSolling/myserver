@@ -25,7 +25,7 @@ namespace myserver.game.service
             this.rand = rand;
         }
 
-        protected Vector3 GetRandomPosInArea()
+        public Vector3 GetRandomPosInArea()
         {
             double saX = spawnArea.X;
             double saY = spawnArea.Y;

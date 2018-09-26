@@ -68,13 +68,13 @@
   <ItemGroup>
     <Compile Include="game\enum\EnumUtil.cs" />
     <Compile Include="game\enum\PlayerStateActionEnum.cs" />
-    <Compile Include="game\service\BaseSpawnArea.cs" />
-    <Compile Include="game\service\PlayerService.cs" />
+    <Compile Include="game\service\base\BaseSpawnArea.cs" />
+    <Compile Include="game\service\player\PlayerService.cs" />
     <Compile Include="game\gamelogic\GameManager.cs" />
     <Compile Include="game\Game.cs" />
-    <Compile Include="game\Player.cs" />
+    <Compile Include="game\service\player\Player.cs" />
     <Compile Include="game\service\weapon\Weapon.cs" />
-    <Compile Include="game\service\weapon\WeaponBase.cs" />
+    <Compile Include="game\service\weapon\WeaponType.cs" />
     <Compile Include="game\service\weapon\WeaponService.cs" />
     <Compile Include="game\service\weapon\WeaponSpawnArea.cs" />
     <Compile Include="game\tcp\TcpServer.cs" />

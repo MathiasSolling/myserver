@@ -21,10 +21,9 @@ namespace myserver.game
         public int RotationY { get; set; }
         public int RotationZ { get; set; }
 
-        public bool W { get; set; } = false;
-        public bool A { get; set; } = false;
-        public bool S { get; set; } = false;
-        public bool D { get; set; } = false;
+        public float VelocityX { get; set; }
+        public float VelocityY { get; set; }
+        public float VelocityZ { get; set; }
 
         public bool Jump { get; set; } = false;
         public bool Shoot { get; set; } = false;
@@ -32,6 +31,8 @@ namespace myserver.game
         public bool Run { get; set; } = false;
 
         public bool Crouch { get; set; } = false;
+
+        public bool Dead = false;
 
         public int Health = 500;
 
@@ -42,7 +43,7 @@ namespace myserver.game
         public int DamageDealtToPlayers = 0;
 
         // Dictionary to hold new state and actions from client - these we broadcast from server to all clients
-        public Dictionary<int, int> NewPsaKeyValue = new Dictionary<int, int>();
+        public Dictionary<int, float> NewPsaKeyValue = new Dictionary<int, float>();
 
         [JsonIgnore]
         public long LastTimeShotFiredInMillis { get; set; } = 0;

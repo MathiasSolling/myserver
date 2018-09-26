@@ -1,4 +1,5 @@
-﻿using System;
+﻿using myserver.game.service.weapon;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,7 @@ namespace myserver.game
         public ConcurrentBag<Player> Players { get; set; }
 
         private PlayerService playerService = new PlayerService();
+        private WeaponService weaponService = new WeaponService();
 
         private UdpClient udpClient;
         

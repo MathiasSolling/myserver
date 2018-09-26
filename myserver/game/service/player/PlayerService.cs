@@ -64,7 +64,7 @@ namespace myserver.game
                 return;
             }
             int psaKey = Int32.Parse(actionKeyValue[0]);
-            int psaValue = Int32.Parse(actionKeyValue[1]);
+            float psaValue = float.Parse(actionKeyValue[1]);
 
             PlayerStateActionEnum psaEnum = (PlayerStateActionEnum)psaKey;
             if (psaEnum != PlayerStateActionEnum.PackageSeqNum && psaEnum != PlayerStateActionEnum.PlayerId)
@@ -73,27 +73,39 @@ namespace myserver.game
                 switch (psaEnum)
                 {
                     case PlayerStateActionEnum.PosX:
-                        player.PositionX = psaValue;
+                        player.PositionX = (int)psaValue;
                         break;
 
                     case PlayerStateActionEnum.PosY:
-                        player.PositionY = psaValue;
+                        player.PositionY = (int)psaValue;
                         break;
 
                     case PlayerStateActionEnum.PosZ:
-                        player.PositionZ = psaValue;
+                        player.PositionZ = (int)psaValue;
                         break;
 
                     case PlayerStateActionEnum.RotX:
-                        player.RotationX = psaValue;
+                        player.RotationX = (int)psaValue;
                         break;
 
                     case PlayerStateActionEnum.RotY:
-                        player.RotationY = psaValue;
+                        player.RotationY = (int)psaValue;
                         break;
 
                     case PlayerStateActionEnum.RotZ:
-                        player.RotationZ = psaValue;
+                        player.RotationZ = (int)psaValue;
+                        break;
+
+                    case PlayerStateActionEnum.VelocityX:
+                        player.VelocityX = psaValue;
+                        break;
+
+                    case PlayerStateActionEnum.VelocityY:
+                        player.VelocityY = psaValue;
+                        break;
+
+                    case PlayerStateActionEnum.VelocityZ:
+                        player.VelocityZ = psaValue;
                         break;
 
                     case PlayerStateActionEnum.Jump:
@@ -112,22 +124,6 @@ namespace myserver.game
                         player.Run = psaValue == 1;
                         break;
 
-                    case PlayerStateActionEnum.W:
-                        player.W = psaValue == 1;
-                        break;
-
-                    case PlayerStateActionEnum.S:
-                        player.S = psaValue == 1;
-                        break;
-
-                    case PlayerStateActionEnum.A:
-                        player.A = psaValue == 1;
-                        break;
-
-                    case PlayerStateActionEnum.D:
-                        player.D = psaValue == 1;
-                        break;
-
                     case PlayerStateActionEnum.Crouch:
                         player.Crouch = psaValue == 1;
                         break;
@@ -144,7 +140,7 @@ namespace myserver.game
             if (player.NewPsaKeyValue.Count != 0)
             {
                 playerState = ";" + player.PlayerId;
-                foreach (KeyValuePair<int, int> entry in player.NewPsaKeyValue)
+                foreach (KeyValuePair<int, float> entry in player.NewPsaKeyValue)
                 {
                     playerState += "," + entry.Key + ":" + entry.Value;
                 }
@@ -156,6 +152,21 @@ namespace myserver.game
             }
             player.NewPsaKeyValue.Clear();
             return playerState;
+        }
+
+        public void ShootPlayer(Player shooter, Player taker)
+        {
+            if (taker.Dead) return;
+            if (shooter.ActiveWeapon.BulletsInMag <= 0) return;
+            int damage = shooter.ActiveWeapon.WeaponType.Damage;
+            if (taker.Health - damage <= 0)
+            {
+                taker.Health = 0;
+                taker.Dead = true;
+                // todo Broadcast to every that taker is dead
+            } 
+            taker.Health -= damage;
+            shooter.ActiveWeapon.BulletsInMag -= 1;
         }
     }
 }

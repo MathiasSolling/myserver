@@ -25,10 +25,9 @@ namespace myserver.game
         Aim,
         Run,
 
-        W,
-        S,
-        A,
-        D,
+        VelocityX,
+        VelocityY,
+        VelocityZ,
 
         Crouch,
 
