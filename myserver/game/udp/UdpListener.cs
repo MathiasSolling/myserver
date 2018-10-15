@@ -1,4 +1,5 @@
-﻿using myserver.game.udp;
+﻿using myserver.game.activitylog;
+using myserver.game.udp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,8 @@ namespace myserver
 {
     public class UdpListener : IDisposable
     {
+        private static ActivityLog Logger = new ActivityLog("UdpListener");
+
         private UdpClient udpClient;
         public const int SIO_UDP_CONNRESET = -1744830452;
 
@@ -28,12 +31,12 @@ namespace myserver
         {
             try
             {
-                Console.WriteLine("Meep-Mop listening for UDP messages...");
+                Logger.Log("Meep-Mop listening for UDP messages...", ActivityLogEnum.NORMAL);
                 udpClient.BeginReceive(new AsyncCallback(DetectionCallback), udpClient);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                Logger.Log(e.ToString(), ActivityLogEnum.CRITICAL);
                 throw;
             }
         }
@@ -54,7 +57,7 @@ namespace myserver
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                Logger.Log(e.ToString(), ActivityLogEnum.WARNING);
                 throw;
             }
         }

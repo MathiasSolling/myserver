@@ -1,4 +1,5 @@
-﻿using System;
+﻿using myserver.game.activitylog;
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -21,6 +22,7 @@ namespace myserver.game.tcp
 
     class TcpServer
     {
+        private static ActivityLog Logger = new ActivityLog("TcpServer");
         private GameManager gameManager;
 
         // Thread signal.  
@@ -60,7 +62,7 @@ namespace myserver.game.tcp
                     allDone.Reset();
 
                     // Start an asynchronous socket to listen for connections.  
-                    Console.WriteLine("Meep-Mop listening for TCP connections...");
+                    Logger.Log("Meep-Mop listening for TCP connections...", ActivityLogEnum.NORMAL);
                     listener.BeginAccept(
                         new AsyncCallback(AcceptCallback),
                         listener);
@@ -72,7 +74,7 @@ namespace myserver.game.tcp
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                Logger.Log(e.ToString(), ActivityLogEnum.WARNING);
             }
 
         }
@@ -86,7 +88,7 @@ namespace myserver.game.tcp
             Socket listener = (Socket)ar.AsyncState;
             Socket handler = listener.EndAccept(ar);
 
-            Console.WriteLine("Accepted TCP connection from " + handler.RemoteEndPoint.ToString());
+            Logger.Log("Accepted TCP connection from " + handler.RemoteEndPoint.ToString(), ActivityLogEnum.NORMAL);
 
             // Create the state object.  
             StateObject state = new StateObject();
@@ -120,8 +122,7 @@ namespace myserver.game.tcp
                 {
                     // All the data has been read from the   
                     // client. Display it on the console.  
-                    Console.WriteLine("Read {0} bytes from socket. \n Data : {1}",
-                        content.Length, content);
+                    Logger.Log("Read " + content.Length + " bytes from socket. \n Data : " + content, ActivityLogEnum.NORMAL);
                     // Echo the data back to the client.  
                     Send(handler, content);
                 }
@@ -153,7 +154,7 @@ namespace myserver.game.tcp
 
                 // Complete sending the data to the remote device.  
                 int bytesSent = handler.EndSend(ar);
-                Console.WriteLine("Sent {0} bytes to client.", bytesSent);
+                Logger.Log("Sent " + bytesSent + " bytes to client.", ActivityLogEnum.NORMAL);
 
                 handler.Shutdown(SocketShutdown.Both);
                 handler.Close();
@@ -161,7 +162,7 @@ namespace myserver.game.tcp
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                Logger.Log(e.ToString(), ActivityLogEnum.WARNING);
             }
         }
     }

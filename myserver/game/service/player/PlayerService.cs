@@ -1,4 +1,6 @@
-﻿using System;
+﻿using myserver.game.activitylog;
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,128 +10,104 @@ namespace myserver.game
 {
     class PlayerService
     {
-        public bool UpdatePlayerState(Player player, String[] packageArray)
-        {
-            bool playerNeedsCorrection = false;
-            foreach (var package in packageArray)
-            {
-                string[] actionsArray = package.Split(',');
-                // packages should (might be malicious) contain an Integer representing PlayerStateActionEnum followed by ':' then value
-                // we know the first packageSplit should be package sequence number but make sure!
-                string[] sequenceNumber = actionsArray[0].Split(':');
-                if (sequenceNumber.Length != 2)
-                {
-                    break;
-                }
-                PlayerStateActionEnum psa = (PlayerStateActionEnum)Int32.Parse(sequenceNumber[0]);
-                if (psa == PlayerStateActionEnum.PackageSeqNum)
-                {
-                    int receivedPackageSeqNum = Int32.Parse(sequenceNumber[1]);
-                    int expectedPackageSeqNum = player.PackageSeq + 1;
-                    if (receivedPackageSeqNum != expectedPackageSeqNum && receivedPackageSeqNum - 64 < expectedPackageSeqNum)
-                    {
-                        // If packageSeq isnt the next one then skip it to get the right order of the packages
-                        continue;
-                    }
-                    else if (receivedPackageSeqNum - 64 > expectedPackageSeqNum)
-                    {
-                        // player client is sending packages with seq number way higher than we expect from it. Means we have lost some packages from client
-                        // and probably need to correct it (rubberband)
-                        playerNeedsCorrection = true;
-                        Console.WriteLine("player id " + player.PlayerId + " is sending packages with too high seq number - sending correction package");
-                        break;
-                    }
-                    // Increment players package seq server side so it matches the package we got
-                    player.PackageSeq = receivedPackageSeqNum;
-                }
-                else
-                {
-                    Console.WriteLine("Malicious package!");
-                    break;
-                }
+        private static ActivityLog Logger = new ActivityLog("PlayerService");
 
-                foreach (var action in actionsArray)
-                {
-                    UpdatePlayer(player, action);
-                }
-            }
-            return playerNeedsCorrection;
+        private ConcurrentBag<Player> Players;
+
+        public PlayerService(ConcurrentBag<Player> Players)
+        {
+            this.Players = Players;
         }
 
-        private void UpdatePlayer(Player player, string action)
+        private Player FindPlayerById(int playerId)
         {
-            string[] actionKeyValue = action.Split(':');
-            if (actionKeyValue.Length != 2)
+            Player playerObj = null;
+            foreach (var player in Players)
             {
-                return;
-            }
-            int psaKey = Int32.Parse(actionKeyValue[0]);
-            float psaValue = float.Parse(actionKeyValue[1]);
-
-            PlayerStateActionEnum psaEnum = (PlayerStateActionEnum)psaKey;
-            if (psaEnum != PlayerStateActionEnum.PackageSeqNum && psaEnum != PlayerStateActionEnum.PlayerId)
-            {
-                player.NewPsaKeyValue[psaKey] = psaValue;
-                switch (psaEnum)
+                if (player.PlayerId == playerId)
                 {
-                    case PlayerStateActionEnum.PosX:
-                        player.PositionX = (int)psaValue;
-                        break;
+                    playerObj = player;
+                }
+            }
+            return playerObj;
+        }
 
-                    case PlayerStateActionEnum.PosY:
-                        player.PositionY = (int)psaValue;
-                        break;
+        public void UpdatePlayer(Player player, Dictionary<int, float> actions)
+        {
+            foreach (KeyValuePair<int, float> entry in actions)
+            {
+                int psaKey = entry.Key;
+                float psaValue = entry.Value;
 
-                    case PlayerStateActionEnum.PosZ:
-                        player.PositionZ = (int)psaValue;
-                        break;
+                PlayerStateActionEnum psaEnum = (PlayerStateActionEnum)psaKey;
+                if (psaEnum != PlayerStateActionEnum.PackageSeqNum && psaEnum != PlayerStateActionEnum.PlayerId)
+                {
+                    player.NewPsaKeyValue[psaKey] = psaValue;
+                    switch (psaEnum)
+                    {
+                        case PlayerStateActionEnum.PosX:
+                            player.PositionX = psaValue;
+                            break;
 
-                    case PlayerStateActionEnum.RotX:
-                        player.RotationX = (int)psaValue;
-                        break;
+                        case PlayerStateActionEnum.PosY:
+                            player.PositionY = psaValue;
+                            break;
 
-                    case PlayerStateActionEnum.RotY:
-                        player.RotationY = (int)psaValue;
-                        break;
+                        case PlayerStateActionEnum.PosZ:
+                            player.PositionZ = psaValue;
+                            break;
 
-                    case PlayerStateActionEnum.RotZ:
-                        player.RotationZ = (int)psaValue;
-                        break;
+                        case PlayerStateActionEnum.RotX:
+                            player.RotationX = (int)psaValue;
+                            break;
 
-                    case PlayerStateActionEnum.VelocityX:
-                        player.VelocityX = psaValue;
-                        break;
+                        case PlayerStateActionEnum.RotY:
+                            player.RotationY = (int)psaValue;
+                            break;
 
-                    case PlayerStateActionEnum.VelocityY:
-                        player.VelocityY = psaValue;
-                        break;
+                        case PlayerStateActionEnum.RotZ:
+                            player.RotationZ = (int)psaValue;
+                            break;
 
-                    case PlayerStateActionEnum.VelocityZ:
-                        player.VelocityZ = psaValue;
-                        break;
+                        case PlayerStateActionEnum.VelocityX:
+                            player.VelocityX = psaValue;
+                            break;
 
-                    case PlayerStateActionEnum.Jump:
-                        player.Jump = psaValue == 1;
-                        break;
+                        case PlayerStateActionEnum.VelocityY:
+                            player.VelocityY = psaValue;
+                            break;
 
-                    case PlayerStateActionEnum.Shoot:
-                        player.Shoot = psaValue == 1;
-                        break;
+                        case PlayerStateActionEnum.VelocityZ:
+                            player.VelocityZ = psaValue;
+                            break;
 
-                    case PlayerStateActionEnum.Aim:
-                        player.Aim = psaValue == 1;
-                        break;
+                        case PlayerStateActionEnum.Jump:
+                            player.Jump = psaValue == 1;
+                            break;
 
-                    case PlayerStateActionEnum.Run:
-                        player.Run = psaValue == 1;
-                        break;
+                        case PlayerStateActionEnum.Shoot:
+                            player.Shoot = psaValue == 1;
+                            break;
 
-                    case PlayerStateActionEnum.Crouch:
-                        player.Crouch = psaValue == 1;
-                        break;
+                        case PlayerStateActionEnum.Aim:
+                            player.Aim = psaValue == 1;
+                            break;
 
-                    default:
-                        break;
+                        case PlayerStateActionEnum.Run:
+                            player.Run = psaValue == 1;
+                            break;
+
+                        case PlayerStateActionEnum.Crouch:
+                            player.Crouch = psaValue == 1;
+                            break;
+
+                        case PlayerStateActionEnum.ShotPlayer:
+                            ShotPlayer(player, (int)psaValue);
+                            break;
+
+                        default:
+                            break;
+                    }
                 }
             }
         }
@@ -142,31 +120,40 @@ namespace myserver.game
                 playerState = ";" + player.PlayerId;
                 foreach (KeyValuePair<int, float> entry in player.NewPsaKeyValue)
                 {
-                    playerState += "," + entry.Key + ":" + entry.Value;
+                    playerState += "," + entry.Key + ":" + entry.Value.ToString("0.##");
                 }
-            }
-            else
-            {
-                // This is just to test instantiation
-                // playerState = ";" + player.PlayerId + ",8:1";
             }
             player.NewPsaKeyValue.Clear();
             return playerState;
         }
 
-        public void ShootPlayer(Player shooter, Player taker)
+        public void ShotPlayer(Player shooter, int playerShotId)
         {
-            if (taker.Dead) return;
+            Player playerShot = FindPlayerById(playerShotId);
+            
+            if (playerShot == null) return;
+            if (playerShot.Dead) return;
             if (shooter.ActiveWeapon.BulletsInMag <= 0) return;
+            if (shooter.PlayerId == playerShotId) return;
+
             int damage = shooter.ActiveWeapon.WeaponType.Damage;
-            if (taker.Health - damage <= 0)
+            shooter.DamageDealtToPlayers += damage;
+
+            if (playerShot.Health - damage <= 0)
             {
-                taker.Health = 0;
-                taker.Dead = true;
-                // todo Broadcast to every that taker is dead
-            } 
-            taker.Health -= damage;
-            shooter.ActiveWeapon.BulletsInMag -= 1;
+                playerShot.Health = 0;
+                playerShot.Dead = true;
+                playerShot.AddNewPsaKeyValue(PlayerStateActionEnum.KilledBy, shooter.PlayerId);
+
+                shooter.Kills++;
+            }
+            else
+            {
+                playerShot.Health = playerShot.Health - damage;
+                playerShot.AddNewPsaKeyValue(PlayerStateActionEnum.Health, playerShot.Health);
+            }
+            
+            shooter.ActiveWeapon.BulletsInMag = shooter.ActiveWeapon.BulletsInMag - 1;
         }
     }
 }

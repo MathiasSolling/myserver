@@ -14,11 +14,11 @@ namespace myserver.game
         private UdpListener udpListener;
 
         private UdpClient udpClient;
-        private TcpServer tcpServer;
+        //private TcpServer tcpServer;
         private GameManager gameManager;
 
         private int UdpPort = 36200;
-        private int TcpPort = 36100;
+        //private int TcpPort = 36100;
 
         private bool disposed = false;
 
@@ -33,8 +33,8 @@ namespace myserver.game
 
         void StartTcpServer()
         {
-            tcpServer = new TcpServer(gameManager, TcpPort);
-            tcpServer.StartListening();
+            //tcpServer = new TcpServer(gameManager, TcpPort);
+            //tcpServer.StartListening(); // Dont start tcp server just yet
         }
 
         void StartUdpServer()

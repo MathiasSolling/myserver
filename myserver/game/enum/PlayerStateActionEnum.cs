@@ -12,27 +12,41 @@ namespace myserver.game
 
         PlayerId,
         PackageSeqNum,
+
+        // Floats
         PosX,
         PosY,
         PosZ,
 
+        // Integers
         RotX,
         RotY,
         RotZ,
 
+        // Booleans
         Jump,
         Shoot,
         Aim,
         Run,
+        Crouch,
 
+        // Floats
         VelocityX,
         VelocityY,
         VelocityZ,
 
-        Crouch,
-
+        // ID of picked up weapon
         PickUpWeapon,
+        // ID of dropped weapon
         DropWeapon,
-        SwitchWeapon
+        // ID of weapon switched to
+        SwitchWeapon,
+
+        // Value is ID of the player who got shot
+        ShotPlayer,
+        // Value is ID of the player who got the kill
+        KilledBy,
+        // Value is the amount of health the player has left
+        Health
     }
 }

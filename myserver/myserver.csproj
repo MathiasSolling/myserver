@@ -66,8 +66,11 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="game\activitylog\ActivityLog.cs" />
+    <Compile Include="game\activitylog\ActivityLogEnum.cs" />
     <Compile Include="game\enum\EnumUtil.cs" />
     <Compile Include="game\enum\PlayerStateActionEnum.cs" />
+    <Compile Include="game\gamelogic\MiscManager.cs" />
     <Compile Include="game\service\base\BaseSpawnArea.cs" />
     <Compile Include="game\service\player\PlayerService.cs" />
     <Compile Include="game\gamelogic\GameManager.cs" />
@@ -79,6 +82,7 @@
     <Compile Include="game\service\weapon\WeaponSpawnArea.cs" />
     <Compile Include="game\tcp\TcpServer.cs" />
     <Compile Include="game\udp\Broadcaster.cs" />
+    <Compile Include="game\udp\PackageHandler.cs" />
     <Compile Include="game\udp\ReceivedDataArgs.cs" />
     <Compile Include="game\udp\HandleData.cs" />
     <Compile Include="game\udp\UdpListener.cs" />

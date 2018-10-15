@@ -1,4 +1,7 @@
-﻿using myserver.game.service.weapon;
+﻿using myserver.game.activitylog;
+using myserver.game.gamelogic;
+using myserver.game.service.weapon;
+using myserver.game.udp;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -12,25 +15,35 @@ namespace myserver.game
 {
     class GameManager
     {
+        private static ActivityLog Logger = new ActivityLog("GameManager");
+
         private int GameId { get; set; }
         public ConcurrentBag<Player> Players { get; set; }
 
-        private PlayerService playerService = new PlayerService();
+        private PlayerService playerService;
         private WeaponService weaponService = new WeaponService();
 
+        private MiscManager miscManager = new MiscManager();
+        private PackageHandler packageHandler;
+
         private UdpClient udpClient;
-        
+
         public GameManager(int gameId, UdpClient udpClient)
         {
             this.GameId = gameId;
             this.udpClient = udpClient;
+
             Players = new ConcurrentBag<Player>();
+            playerService = new PlayerService(Players);
+            packageHandler = new PackageHandler(Players);
         }
 
         public void DoGameLogic(double deltaTime)
         {
             CalculateMovements(deltaTime);
             CalculatePhysics();
+
+            miscManager.CheckForInactivity(Players);
         }
 
         public void CalculateMovements(double deltaTime)
@@ -60,38 +73,30 @@ namespace myserver.game
             return newPlayerId;
         }
 
-        public string UpdatePlayerState(String message)
+        public string HandlePlayerStateInformation(String message)
         {
-            // messageSplit[0] is the package type 001
-            string[] messageSplit = message.Split(';');
-            // messageSplit[1] is the playerId
-            int pId = Int32.Parse(messageSplit[1]);
-            // Skipping first which is message type (001 player state) and second which is pId
-            string[] packageArray = messageSplit.Skip(2).ToArray();
+            string[] packageArray = packageHandler.GetPlayer(message, out Player player);
 
             string returnString = "-1";
             if (packageArray.Length == 0)
             {
-                Console.WriteLine("Missing actions in UpdatePlayerState!");
                 return returnString;
             }
-            // So now we should just have a list of packages
-            foreach (var player in Players)
+            if (player != null)
             {
-                if (player.PlayerId == pId)
+                bool playerNeedsCorrection = packageHandler.GetPlayerStateInformation(packageArray, player, out Dictionary<int, float> actions);
+                if (!playerNeedsCorrection)
                 {
-                    bool playerNeedsCorrection = playerService.UpdatePlayerState(player, packageArray);
-                    if (!playerNeedsCorrection)
-                    {
-                        // send packageSeqNum that server has processed
-                        returnString = "001;" + player.PackageSeq.ToString();
-                    } 
-                    else
-                    {
-                        // send correction package to player
-                        // todo
-                        returnString = "e001;2:" + player.PositionX + ",3:" + player.PositionY + ",4:" + player.PositionZ;
-                    }
+                    playerService.UpdatePlayer(player, actions);
+
+                    // send packageSeqNum that server has processed
+                    returnString = "001;" + player.PackageSeq.ToString();
+                }
+                else
+                {
+                    // send correction package to player because player sends packeages with too high seq number
+                    // todo
+                    returnString = "e001;2:" + player.PositionX + ",3:" + player.PositionY + ",4:" + player.PositionZ;
                 }
             }
             return returnString;
@@ -116,14 +121,31 @@ namespace myserver.game
             if (constructedPlayerPositions.Length != 0)
             {
                 string playerPositions = "002" + constructedPlayerPositions;
-                Console.WriteLine("BroadcastGameState ===> " + playerPositions);
+                Logger.Log("BroadcastGameState ===> " + playerPositions, ActivityLogEnum.NORMAL);
                 var dg = Encoding.ASCII.GetBytes(playerPositions);
                 foreach (var player in Players)
                 {
-                    Console.WriteLine(player.Ep.Address);
                     udpClient.Send(dg, dg.Length, player.Ep);
                 }
             }
+        }
+
+        public Player FindPlayerById(int playerId)
+        {
+            foreach (var player in Players)
+            {
+                if (playerId == player.PlayerId)
+                {
+                    return player;
+                }
+            }
+            return null;
+        }
+
+        public void SendUDPMessage(Player player, string message)
+        {
+            var dg = Encoding.ASCII.GetBytes(message);
+            udpClient.Send(dg, dg.Length, player.Ep);
         }
     }
 }

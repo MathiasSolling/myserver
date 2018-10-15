@@ -1,4 +1,5 @@
-﻿using System;
+﻿using myserver.game.activitylog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -10,6 +11,8 @@ namespace myserver.game.service.weapon
 {
     class WeaponService
     {
+        private static ActivityLog Logger = new ActivityLog("WeaponService");
+
         private int maxAmountOfWeaponsPerPlayer = 4;
 
         // Random object to pass around (If creating multiple new ones in a loop it will rand the same numbers)
@@ -41,7 +44,7 @@ namespace myserver.game.service.weapon
             // ^ Random spawn points for testing purpose
 
             SpawnWeaponsOnMap();
-            Console.WriteLine(AvailableWeapons.Count + " weapons spawned");
+            Logger.Log(AvailableWeapons.Count + " weapons spawned", ActivityLogEnum.NORMAL);
         }
 
         public bool PickUpWeapon(Player player, int weaponId)

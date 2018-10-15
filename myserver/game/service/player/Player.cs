@@ -13,9 +13,9 @@ namespace myserver.game
     {
         public int PlayerId { get; set; }
 
-        public int PositionX { get; set; }
-        public int PositionY { get; set; }
-        public int PositionZ { get; set; }
+        public float PositionX { get; set; }
+        public float PositionY { get; set; }
+        public float PositionZ { get; set; }
 
         public int RotationX { get; set; }
         public int RotationY { get; set; }
@@ -41,6 +41,8 @@ namespace myserver.game
 
         public int DamageDealtToNpc = 0;
         public int DamageDealtToPlayers = 0;
+
+        public int Kills = 0;
 
         // Dictionary to hold new state and actions from client - these we broadcast from server to all clients
         public Dictionary<int, float> NewPsaKeyValue = new Dictionary<int, float>();
@@ -72,6 +74,15 @@ namespace myserver.game
             this.RotationZ = rotZ;
 
             this.Ep = ep;
+        }
+
+        public void AddNewPsaKeyValue(PlayerStateActionEnum playerStateActionEnum, float value)
+        {
+            if (playerStateActionEnum == PlayerStateActionEnum.PackageSeqNum || playerStateActionEnum == PlayerStateActionEnum.PlayerId)
+            {
+                return;
+            }
+            NewPsaKeyValue[(int)playerStateActionEnum] = value;
         }
     }
 }
