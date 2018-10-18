@@ -80,6 +80,7 @@
     <Compile Include="game\service\weapon\WeaponType.cs" />
     <Compile Include="game\service\weapon\WeaponService.cs" />
     <Compile Include="game\service\weapon\WeaponSpawnArea.cs" />
+    <Compile Include="game\service\weapon\WeaponTypeNameEnum.cs" />
     <Compile Include="game\tcp\TcpServer.cs" />
     <Compile Include="game\udp\Broadcaster.cs" />
     <Compile Include="game\udp\PackageHandler.cs" />

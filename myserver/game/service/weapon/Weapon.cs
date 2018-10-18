@@ -14,19 +14,27 @@ namespace myserver.game.service.weapon
 
         public int BulletsInMag;
 
-        public int WeaponPosX;
-        public int WeaponPosY;
-        public int WeaponPosZ;
+        public int WeaponPosX = 0;
+        public int WeaponPosY = 0;
+        public int WeaponPosZ = 0;
 
         public bool PickedUp = false;
 
-        public Weapon(int weaponId, WeaponType weaponType, int BulletsInMag, int x, int y, int z)
+        public Weapon(int weaponId, WeaponType weaponType, int x, int y, int z)
         {
             this.WeaponId = weaponId;
             this.WeaponType = weaponType;
+            this.BulletsInMag = weaponType.MaxBulletsInMag;
             this.WeaponPosX = x;
             this.WeaponPosY = y;
             this.WeaponPosZ = z;
+        }
+
+        public Weapon(int weaponId, WeaponType weaponType)
+        {
+            this.WeaponId = weaponId;
+            this.WeaponType = weaponType;
+            this.BulletsInMag = weaponType.MaxBulletsInMag;
         }
     }
 }

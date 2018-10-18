@@ -1,5 +1,6 @@
 ﻿using myserver.game.activitylog;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -19,13 +20,13 @@ namespace myserver.game.service.weapon
         private Random rand = new Random();
 
         // List to keep weapons that are spawnable/enabled
-        public List<WeaponType> WeaponTypes = new List<WeaponType>();
+        public ConcurrentBag<WeaponType> WeaponTypes = new ConcurrentBag<WeaponType>();
 
         // List to store weapons that has been spawned
-        public List<Weapon> AvailableWeapons = new List<Weapon>();
+        public ConcurrentBag<Weapon> AvailableWeapons = new ConcurrentBag<Weapon>();
 
         // Weapon spawn points on map
-        public List<WeaponSpawnArea> SpawnPoints = new List<WeaponSpawnArea>();
+        public ConcurrentBag<WeaponSpawnArea> SpawnPoints = new ConcurrentBag<WeaponSpawnArea>();
 
         public WeaponService()
         {
@@ -34,8 +35,8 @@ namespace myserver.game.service.weapon
 
         private void Init()
         {
-            WeaponTypes.Add(new WeaponType("FreeHands", 20, 0, 30, 0, true));
-            WeaponTypes.Add(new WeaponType("SniperRifle", 100, 20, 30, 1000, true));
+            WeaponTypes.Add(new WeaponType(WeaponTypeNameEnum.FreeHands.ToString(), 10, 0, 30, 0, false, true, true, false));
+            WeaponTypes.Add(new WeaponType(WeaponTypeNameEnum.SniperRifle.ToString(), 30, 20, 30, 1000, true, true, true, true));
 
             // Todo add weapon spawn points
             SpawnPoints.Add(new WeaponSpawnArea(new Point(5, 15), new Point(15, 25), 2, rand));
@@ -52,11 +53,13 @@ namespace myserver.game.service.weapon
             bool canPickUpWeapon = false;
             if (player.Weapons.Count < maxAmountOfWeaponsPerPlayer)
             {
-                Weapon weap = AvailableWeapons.Find(x => x.WeaponId == weaponId);
-                if (weap != null)
+                foreach (var weapon in AvailableWeapons)
                 {
-                    player.Weapons.Add(weap);
-                    canPickUpWeapon = true;
+                    if (weapon.WeaponId == weaponId)
+                    {
+                        player.Weapons.Add(weapon);
+                        canPickUpWeapon = true;
+                    }
                 }
             }
             // todo Tell other players that this weapon has been picked up UDP + TCP
@@ -107,12 +110,44 @@ namespace myserver.game.service.weapon
                     if (randomNum < weaponType.DropChanceOf1000)
                     {
                         Vector3 spwanPosition = spawnPoint.GetRandomPosInArea();
-                        Weapon newWeap = new Weapon(AvailableWeapons.Count + 1, weaponType, weaponType.MaxBulletsInMag, (int)spwanPosition.X, (int)spwanPosition.Y, (int)spwanPosition.Z);
+                        Weapon newWeap = new Weapon(AvailableWeapons.Count + 1, weaponType, (int)spwanPosition.X, (int)spwanPosition.Y, (int)spwanPosition.Z);
                         AvailableWeapons.Add(newWeap);
                     }
                 }
             }
             return spawnedWeaps;
+        }
+
+        public void CreateWeaponsForNewPlayer(Player player)
+        {
+            foreach (WeaponType weaponType in WeaponTypes)
+            {
+                if (weaponType.PlayerStarterWeapon)
+                {
+                    Weapon newWeap = new Weapon(AvailableWeapons.Count + 1, weaponType);
+                    player.Weapons.Add(newWeap);
+                    if (weaponType.PlayerStarterActiveWeapon)
+                    {
+                        player.ActiveWeapon = newWeap;
+                    }
+                }
+            }
+            if (player.ActiveWeapon == null)
+            {
+                Logger.Log("CreateWeaponsForNewPlayer() didn't give player an active weapon", ActivityLogEnum.CRITICAL);
+            }
+        }
+
+        public WeaponType FindWeaponTypeByName(WeaponTypeNameEnum weaponTypeNameEnum)
+        {
+            foreach (var weaponType in WeaponTypes)
+            {
+                if (weaponType.WeaponName == weaponTypeNameEnum.ToString())
+                {
+                    return weaponType;
+                }
+            }
+            return null;
         }
     }
 }

@@ -132,9 +132,17 @@ namespace myserver.game
             Player playerShot = FindPlayerById(playerShotId);
             
             if (playerShot == null) return;
+            Logger.Log("past 1", ActivityLogEnum.CRITICAL);
             if (playerShot.Dead) return;
+            Logger.Log("past 2", ActivityLogEnum.CRITICAL);
+            if (shooter.Dead) return;
+            Logger.Log("past 3", ActivityLogEnum.CRITICAL);
+            if (shooter.ActiveWeapon == null) return;
+            Logger.Log("past 4", ActivityLogEnum.CRITICAL);
             if (shooter.ActiveWeapon.BulletsInMag <= 0) return;
+            Logger.Log("past 5", ActivityLogEnum.CRITICAL);
             if (shooter.PlayerId == playerShotId) return;
+            Logger.Log("past 6", ActivityLogEnum.CRITICAL);
 
             int damage = shooter.ActiveWeapon.WeaponType.Damage;
             shooter.DamageDealtToPlayers += damage;
@@ -154,6 +162,8 @@ namespace myserver.game
             }
             
             shooter.ActiveWeapon.BulletsInMag = shooter.ActiveWeapon.BulletsInMag - 1;
+
+            Logger.Log("Player#" + shooter.PlayerId + " shot Player#" + playerShot.PlayerId, ActivityLogEnum.NORMAL);
         }
     }
 }

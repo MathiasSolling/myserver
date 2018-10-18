@@ -69,6 +69,7 @@ namespace myserver.game
             }
             int newPlayerId = Players.Count() + 1;
             Player p = new Player(newPlayerId, 0, 3, 0, 0, 0, 0, ep);
+            weaponService.CreateWeaponsForNewPlayer(p);
             Players.Add(p);
             return newPlayerId;
         }

@@ -1,6 +1,7 @@
 ﻿using myserver.game.service.weapon;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -45,7 +46,7 @@ namespace myserver.game
         public int Kills = 0;
 
         // Dictionary to hold new state and actions from client - these we broadcast from server to all clients
-        public Dictionary<int, float> NewPsaKeyValue = new Dictionary<int, float>();
+        public ConcurrentDictionary<int, float> NewPsaKeyValue = new ConcurrentDictionary<int, float>();
 
         [JsonIgnore]
         public long LastTimeShotFiredInMillis { get; set; } = 0;
