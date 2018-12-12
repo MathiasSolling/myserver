@@ -1,5 +1,5 @@
-﻿using myserver.game.service.weapon;
-using myserver.game.tcp;
+﻿using myserver.game.gamelogic;
+using myserver.game.service.weapon;
 using myserver.game.udp;
 using System;
 using System.Net;
@@ -14,27 +14,24 @@ namespace myserver.game
         private UdpListener udpListener;
 
         private UdpClient udpClient;
-        //private TcpServer tcpServer;
+        
         private GameManager gameManager;
 
         private int UdpPort = 36200;
-        //private int TcpPort = 36100;
 
         private bool disposed = false;
+
+        private GameState gameState;
+
+        private int gameId = 1;
 
         public Game()
         {
             udpClient = new UdpClient(new IPEndPoint(IPAddress.Any, UdpPort));
-            gameManager = new GameManager(1, udpClient);
+            gameState = new GameState(udpClient, gameId);
+            gameManager = new GameManager(gameState);
 
             StartUdpServer();
-            StartTcpServer();
-        }
-
-        void StartTcpServer()
-        {
-            //tcpServer = new TcpServer(gameManager, TcpPort);
-            //tcpServer.StartListening(); // Dont start tcp server just yet
         }
 
         void StartUdpServer()
@@ -52,7 +49,7 @@ namespace myserver.game
             // Thread to broadcast gamestate to all players in a fixed interval
             Broadcaster broadCaster = new Broadcaster(gameManager);
             Thread broadcasterThread = new Thread(() => broadCaster.BroadcastGameState());
-            broadcasterThread.Start();
+            broadcasterThread.Start(); 
         }
 
         protected virtual void Dispose(bool disposing)

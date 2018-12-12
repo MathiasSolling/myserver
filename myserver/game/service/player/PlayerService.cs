@@ -1,4 +1,6 @@
 ﻿using myserver.game.activitylog;
+using myserver.game.gamelogic;
+using myserver.game.service.npc;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -12,24 +14,11 @@ namespace myserver.game
     {
         private static ActivityLog Logger = new ActivityLog("PlayerService");
 
-        private ConcurrentBag<Player> Players;
+        private GameState gameState;
 
-        public PlayerService(ConcurrentBag<Player> Players)
+        public PlayerService(GameState gameState)
         {
-            this.Players = Players;
-        }
-
-        private Player FindPlayerById(int playerId)
-        {
-            Player playerObj = null;
-            foreach (var player in Players)
-            {
-                if (player.PlayerId == playerId)
-                {
-                    playerObj = player;
-                }
-            }
-            return playerObj;
+            this.gameState = gameState;
         }
 
         public void UpdatePlayer(Player player, Dictionary<int, float> actions)
@@ -112,58 +101,58 @@ namespace myserver.game
             }
         }
 
-        public String RetrieveNewPlayerState(Player player)
+        public void ShotPlayer(Player shooter, int targetId)
         {
-            String playerState = "";
-            if (player.NewPsaKeyValue.Count != 0)
-            {
-                playerState = ";" + player.PlayerId;
-                foreach (KeyValuePair<int, float> entry in player.NewPsaKeyValue)
-                {
-                    playerState += "," + entry.Key + ":" + entry.Value.ToString("0.##");
-                }
-            }
-            player.NewPsaKeyValue.Clear();
-            return playerState;
-        }
-
-        public void ShotPlayer(Player shooter, int playerShotId)
-        {
-            Player playerShot = FindPlayerById(playerShotId);
+            IKillable target = FindTargetById(targetId);
             
-            if (playerShot == null) return;
+            if (target == null) return;
             Logger.Log("past 1", ActivityLogEnum.CRITICAL);
-            if (playerShot.Dead) return;
-            Logger.Log("past 2", ActivityLogEnum.CRITICAL);
             if (shooter.Dead) return;
-            Logger.Log("past 3", ActivityLogEnum.CRITICAL);
+            Logger.Log("past 2", ActivityLogEnum.CRITICAL);
             if (shooter.ActiveWeapon == null) return;
-            Logger.Log("past 4", ActivityLogEnum.CRITICAL);
+            Logger.Log("past 3", ActivityLogEnum.CRITICAL);
             if (shooter.ActiveWeapon.BulletsInMag <= 0) return;
+            Logger.Log("past 4", ActivityLogEnum.CRITICAL);
+            if (shooter.PlayerId == targetId) return;
             Logger.Log("past 5", ActivityLogEnum.CRITICAL);
-            if (shooter.PlayerId == playerShotId) return;
-            Logger.Log("past 6", ActivityLogEnum.CRITICAL);
 
             int damage = shooter.ActiveWeapon.WeaponType.Damage;
             shooter.DamageDealtToPlayers += damage;
 
-            if (playerShot.Health - damage <= 0)
+            bool targetDied = target.TakeDamage(damage, shooter.PlayerId);
+            if (targetDied)
             {
-                playerShot.Health = 0;
-                playerShot.Dead = true;
-                playerShot.AddNewPsaKeyValue(PlayerStateActionEnum.KilledBy, shooter.PlayerId);
-
                 shooter.Kills++;
-            }
-            else
-            {
-                playerShot.Health = playerShot.Health - damage;
-                playerShot.AddNewPsaKeyValue(PlayerStateActionEnum.Health, playerShot.Health);
             }
             
             shooter.ActiveWeapon.BulletsInMag = shooter.ActiveWeapon.BulletsInMag - 1;
 
-            Logger.Log("Player#" + shooter.PlayerId + " shot Player#" + playerShot.PlayerId, ActivityLogEnum.NORMAL);
+            Logger.Log("Player#" + shooter.PlayerId + " shot Player#" + targetId, ActivityLogEnum.NORMAL);
+        }
+
+        public IKillable FindTargetById(int targetId)
+        {
+            // TODO move this to more appropiate place
+            IKillable target = null;
+            foreach (var player in gameState.players)
+            {
+                if (player.PlayerId == targetId) return player;
+            }
+            foreach (var zombie in gameState.zombies)
+            {
+                if (zombie.npcId == targetId) return zombie;
+            }
+            return target;
+        }
+
+        public string ConstructAllPlayerPostitions()
+        {
+            string playerPositions = "";
+            foreach (var player in gameState.players)
+            {
+                playerPositions += player.RetrieveNewPlayerState();
+            }
+            return playerPositions;
         }
     }
 }

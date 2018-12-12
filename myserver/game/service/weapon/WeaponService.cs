@@ -35,8 +35,8 @@ namespace myserver.game.service.weapon
 
         private void Init()
         {
-            WeaponTypes.Add(new WeaponType(WeaponTypeNameEnum.FreeHands.ToString(), 10, 0, 30, 0, false, true, true, false));
-            WeaponTypes.Add(new WeaponType(WeaponTypeNameEnum.SniperRifle.ToString(), 30, 20, 30, 1000, true, true, true, true));
+            WeaponTypes.Add(new WeaponType(WeaponTypeNameEnum.FreeHands.ToString(), 10, 0, 1000000000, 0, false, true, true, false));
+            WeaponTypes.Add(new WeaponType(WeaponTypeNameEnum.SniperRifle.ToString(), 25, 20, 1000000000, 1000, true, true, true, true));
 
             // Todo add weapon spawn points
             SpawnPoints.Add(new WeaponSpawnArea(new Point(5, 15), new Point(15, 25), 2, rand));

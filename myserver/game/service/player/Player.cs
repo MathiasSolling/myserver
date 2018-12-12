@@ -1,4 +1,5 @@
-﻿using myserver.game.service.weapon;
+﻿using myserver.game.service.npc;
+using myserver.game.service.weapon;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace myserver.game
 {
-    class Player
+    class Player : IKillable
     {
         public int PlayerId { get; set; }
 
@@ -45,7 +46,7 @@ namespace myserver.game
 
         public int Kills = 0;
 
-        // Dictionary to hold new state and actions from client - these we broadcast from server to all clients
+        // Dictionary to hold new state and actions sent from the player client to then broadcast right away to all other clients
         public ConcurrentDictionary<int, float> NewPsaKeyValue = new ConcurrentDictionary<int, float>();
 
         [JsonIgnore]
@@ -75,6 +76,37 @@ namespace myserver.game
             this.RotationZ = rotZ;
 
             this.Ep = ep;
+        }
+
+        public bool TakeDamage(int damage, float attackerId)
+        {
+            if (Dead) return false;
+            Health -= damage;
+            if (Health <= 0)
+            {
+                Dead = true;
+                AddNewPsaKeyValue(PlayerStateActionEnum.KilledBy, attackerId);
+            }
+            else
+            {
+                AddNewPsaKeyValue(PlayerStateActionEnum.Health, Health);
+            }
+            return Dead;
+        }
+
+        public string RetrieveNewPlayerState()
+        {
+            string playerState = "";
+            if (NewPsaKeyValue.Count != 0)
+            {
+                playerState = ";" + PlayerId;
+                foreach (KeyValuePair<int, float> entry in NewPsaKeyValue)
+                {
+                    playerState += "," + entry.Key + ":" + entry.Value.ToString("0.##");
+                }
+            }
+            NewPsaKeyValue.Clear();
+            return playerState;
         }
 
         public void AddNewPsaKeyValue(PlayerStateActionEnum playerStateActionEnum, float value)

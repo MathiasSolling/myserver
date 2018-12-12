@@ -69,8 +69,14 @@
     <Compile Include="game\activitylog\ActivityLog.cs" />
     <Compile Include="game\activitylog\ActivityLogEnum.cs" />
     <Compile Include="game\enum\EnumUtil.cs" />
+    <Compile Include="game\enum\NpcTypeEnum.cs" />
     <Compile Include="game\enum\PlayerStateActionEnum.cs" />
+    <Compile Include="game\gamelogic\GameState.cs" />
     <Compile Include="game\gamelogic\MiscManager.cs" />
+    <Compile Include="game\service\npc\IKillable.cs" />
+    <Compile Include="game\service\npc\Npc.cs" />
+    <Compile Include="game\service\npc\NpcService.cs" />
+    <Compile Include="game\service\npc\zombie\Zombie.cs" />
     <Compile Include="game\service\base\BaseSpawnArea.cs" />
     <Compile Include="game\service\player\PlayerService.cs" />
     <Compile Include="game\gamelogic\GameManager.cs" />
@@ -81,7 +87,6 @@
     <Compile Include="game\service\weapon\WeaponService.cs" />
     <Compile Include="game\service\weapon\WeaponSpawnArea.cs" />
     <Compile Include="game\service\weapon\WeaponTypeNameEnum.cs" />
-    <Compile Include="game\tcp\TcpServer.cs" />
     <Compile Include="game\udp\Broadcaster.cs" />
     <Compile Include="game\udp\PackageHandler.cs" />
     <Compile Include="game\udp\ReceivedDataArgs.cs" />
@@ -109,8 +114,6 @@
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="game\npc\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

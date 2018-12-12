@@ -10,7 +10,7 @@ namespace myserver.game.gamelogic
     class MiscManager
     {
 
-        public void CheckForInactivity(ConcurrentBag<Player> players)
+        public void CheckForInactivity(GameState gameState)
         {
 
         }

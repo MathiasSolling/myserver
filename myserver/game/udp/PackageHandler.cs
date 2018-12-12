@@ -1,4 +1,5 @@
 ﻿using myserver.game.activitylog;
+using myserver.game.gamelogic;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -11,11 +12,11 @@ namespace myserver.game.udp
     class PackageHandler
     {
         private static ActivityLog Logger = new ActivityLog("PackageHandler");
-        private ConcurrentBag<Player> Players;
+        private GameState gameState;
 
-        public PackageHandler(ConcurrentBag<Player> players)
+        public PackageHandler(GameState gameState)
         {
-            this.Players = players;
+            this.gameState = gameState;
         }
 
         public string[] GetPlayer(string message, out Player player)
@@ -23,7 +24,11 @@ namespace myserver.game.udp
             // messageSplit[0] is the package type 001
             string[] messageSplit = message.Split(';');
             // messageSplit[1] is the playerId
-            int pId = Int32.Parse(messageSplit[1]);
+            if (!int.TryParse(messageSplit[1], out int pId))
+            {
+                player = null;
+                return new string[0];
+            }
             // Skipping first which is message type (001 player state) and second which is pId
             string[] packageArray = messageSplit.Skip(2).ToArray();
 
@@ -74,12 +79,10 @@ namespace myserver.game.udp
                 foreach (var action in actionsArray)
                 {
                     string[] actionKeyValue = action.Split(':');
-                    if (actionKeyValue.Length != 2)
+                    if (!Int32.TryParse(actionKeyValue[0], out int psaKey) || !float.TryParse(actionKeyValue[1], out float psaValue))
                     {
                         continue;
                     }
-                    int psaKey = Int32.Parse(actionKeyValue[0]);
-                    float psaValue = float.Parse(actionKeyValue[1]);
                     actions[psaKey] = psaValue;
                 }
             }
@@ -88,7 +91,7 @@ namespace myserver.game.udp
 
         private Player FindPlayerById(int playerId)
         {
-            foreach (var player in Players)
+            foreach (var player in gameState.players)
             {
                 if (playerId == player.PlayerId)
                 {

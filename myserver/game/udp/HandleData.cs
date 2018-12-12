@@ -27,7 +27,7 @@ namespace myserver
         void listener_DataReceivedEvent(UdpClient sender, ReceivedDataArgs args)
         {
             string message = Encoding.ASCII.GetString(args.ReceivedBytes);
-            Console.WriteLine("Received message from: " + args.IpAddress.ToString() + ", Port: " + args.Port.ToString() + ", Message: " + message);
+            //Console.WriteLine("Received message from: " + args.IpAddress.ToString() + ", Port: " + args.Port.ToString() + ", Message: " + message);
 
             IPEndPoint ep = new IPEndPoint(args.IpAddress, args.Port);
             if (message.StartsWith("000"))
@@ -45,7 +45,7 @@ namespace myserver
                 String confirmationString = gameManager.HandlePlayerStateInformation(message);
                 if (!confirmationString.Equals("-1"))
                 {
-                    Logger.Log("Answer to package from Client => " + confirmationString + " and EP " + ep.Address + ":" + ep.Port, ActivityLogEnum.NORMAL);
+                    // Logger.Log("Answer to package from Client => " + confirmationString + " and EP " + ep.Address + ":" + ep.Port, ActivityLogEnum.NORMAL);
                     var dg = Encoding.ASCII.GetBytes(confirmationString);
                     sender.Send(dg, dg.Length, ep);
                 }

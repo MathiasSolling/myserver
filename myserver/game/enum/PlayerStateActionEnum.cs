@@ -47,6 +47,12 @@ namespace myserver.game
         // Value is ID of the player who got the kill
         KilledBy,
         // Value is the amount of health the player has left
-        Health
+        Health,
+
+        NpcId,
+        // Npc type
+        NpcType,
+        // PlayerId of the player who are targeted by the NPC
+        NpcTarget
     }
 }
