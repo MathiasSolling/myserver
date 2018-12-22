@@ -69,7 +69,7 @@
     <Compile Include="game\activitylog\ActivityLog.cs" />
     <Compile Include="game\activitylog\ActivityLogEnum.cs" />
     <Compile Include="game\enum\EnumUtil.cs" />
-    <Compile Include="game\enum\NpcTypeEnum.cs" />
+    <Compile Include="game\enum\ObjectType.cs" />
     <Compile Include="game\enum\PlayerStateActionEnum.cs" />
     <Compile Include="game\gamelogic\GameState.cs" />
     <Compile Include="game\gamelogic\MiscManager.cs" />

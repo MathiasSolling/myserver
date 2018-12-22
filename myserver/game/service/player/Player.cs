@@ -13,7 +13,7 @@ namespace myserver.game
 {
     class Player : IKillable
     {
-        public int PlayerId { get; set; }
+        public int playerId { get; set; }
 
         public float PositionX { get; set; }
         public float PositionY { get; set; }
@@ -65,7 +65,7 @@ namespace myserver.game
 
         public Player(int playerId, int posX, int posY, int posZ, int rotX, int rotY, int rotZ, IPEndPoint ep)
         {
-            this.PlayerId = playerId;
+            this.playerId = playerId;
 
             this.PositionX = posX;
             this.PositionY = posY;
@@ -99,7 +99,9 @@ namespace myserver.game
             string playerState = "";
             if (NewPsaKeyValue.Count != 0)
             {
-                playerState = ";" + PlayerId;
+                AddNewPsaKeyValue(PlayerStateActionEnum.ObjectId, playerId);
+                AddNewPsaKeyValue(PlayerStateActionEnum.ObjectType, (int)ObjectType.Player);
+
                 foreach (KeyValuePair<int, float> entry in NewPsaKeyValue)
                 {
                     playerState += "," + entry.Key + ":" + entry.Value.ToString("0.##");
@@ -111,7 +113,7 @@ namespace myserver.game
 
         public void AddNewPsaKeyValue(PlayerStateActionEnum playerStateActionEnum, float value)
         {
-            if (playerStateActionEnum == PlayerStateActionEnum.PackageSeqNum || playerStateActionEnum == PlayerStateActionEnum.PlayerId)
+            if (playerStateActionEnum == PlayerStateActionEnum.PackageSeqNum)
             {
                 return;
             }

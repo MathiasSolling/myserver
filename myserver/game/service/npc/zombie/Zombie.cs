@@ -19,7 +19,7 @@ namespace myserver.game.npc.zombie
         private float attacksPerSecond = 0.5f;
         private long lastTimeAttacked = 0;
 
-        public Zombie(int npcId) : base(npcId, NpcTypeEnum.Zombie)
+        public Zombie(int npcId) : base(npcId, ObjectType.Zombie)
         {
 
         }
@@ -45,7 +45,7 @@ namespace myserver.game.npc.zombie
                 AddNewNsaKeyValue(PlayerStateActionEnum.PosZ, position.Z);
 
                 AddNewNsaKeyValue(PlayerStateActionEnum.VelocityX, velocity.X);
-                //AddNewNsaKeyValue(PlayerStateActionEnum.VelocityY, velocity.Y);
+                // AddNewNsaKeyValue(PlayerStateActionEnum.VelocityY, velocity.Y);
                 AddNewNsaKeyValue(PlayerStateActionEnum.VelocityZ, velocity.Z);
             }
             
@@ -65,26 +65,30 @@ namespace myserver.game.npc.zombie
             //AddNewNsaKeyValue(PlayerStateActionEnum.RotZ, rotation.Z);
         }
 
-        public void UpdateNpcTarget(ConcurrentBag<Player> players)
+        public void UpdateNpcTarget(ConcurrentDictionary<int, Player> players)
         {
             Vector3 targetPos = new Vector3();
             if (Target != null)
             {
-                targetPos = new Vector3(Target.PositionX, Target.PositionY, Target.PositionZ);
-            }
-            if (Target.Dead)
-            {
-                Target = null;
+                if (Target.Dead)
+                {
+                    Target = null;
+                }
+                else
+                {
+                    targetPos = new Vector3(Target.PositionX, Target.PositionY, Target.PositionZ);
+                }
             }
 
-            foreach (var player in players)
+            foreach (KeyValuePair<int, Player> entry in players)
             {
+                var player = entry.Value;
                 if (player.Dead) continue;
                 if (Target == null)
                 {
                     Target = player;
                     targetPos = new Vector3(Target.PositionX, Target.PositionY, Target.PositionZ);
-                    AddNewNsaKeyValue(PlayerStateActionEnum.NpcTarget, Target.PlayerId);
+                    // AddNewNsaKeyValue(PlayerStateActionEnum.NpcTarget, Target.PlayerId);
                     continue;
                 }
                 Vector3 playerPos = new Vector3(player.PositionX, player.PositionY, player.PositionZ);
@@ -92,7 +96,7 @@ namespace myserver.game.npc.zombie
                 {
                     Target = player;
                     targetPos = new Vector3(Target.PositionX, Target.PositionY, Target.PositionZ);
-                    AddNewNsaKeyValue(PlayerStateActionEnum.NpcTarget, Target.PlayerId);
+                    // AddNewNsaKeyValue(PlayerStateActionEnum.NpcTarget, Target.PlayerId);
                 }
             }
         }
@@ -116,6 +120,7 @@ namespace myserver.game.npc.zombie
             if (Vector3.Distance(targetPos, position) < attackRange)
             {
                 Target.TakeDamage(damage, npcId);
+                AddNewNsaKeyValue(PlayerStateActionEnum.Attack, 1);
             }
         }
 

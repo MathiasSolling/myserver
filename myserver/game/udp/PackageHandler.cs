@@ -32,7 +32,7 @@ namespace myserver.game.udp
             // Skipping first which is message type (001 player state) and second which is pId
             string[] packageArray = messageSplit.Skip(2).ToArray();
 
-            player = FindPlayerById(pId);
+            player = gameState.FindPlayerById(pId);
             return packageArray;
         }
 
@@ -87,18 +87,6 @@ namespace myserver.game.udp
                 }
             }
             return playerNeedsCorrection;
-        }
-
-        private Player FindPlayerById(int playerId)
-        {
-            foreach (var player in gameState.players)
-            {
-                if (playerId == player.PlayerId)
-                {
-                    return player;
-                }
-            }
-            return null;
         }
     }
 }

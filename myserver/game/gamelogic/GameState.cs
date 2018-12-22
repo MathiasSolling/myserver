@@ -18,8 +18,8 @@ namespace myserver.game.gamelogic
         public long gameStartTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
         private long gameEndTime;
 
-        public ConcurrentBag<Player> players = new ConcurrentBag<Player>();
-        public ConcurrentBag<Zombie> zombies = new ConcurrentBag<Zombie>();
+        public ConcurrentDictionary<int, Player> players = new ConcurrentDictionary<int, Player>();
+        public ConcurrentDictionary<int, Zombie> zombies = new ConcurrentDictionary<int, Zombie>();
 
         private int UID = 0;
         private object _lock = new object();
@@ -42,6 +42,15 @@ namespace myserver.game.gamelogic
             {
                 return ++UID;
             }
+        }
+
+        public Player FindPlayerById(int playerId)
+        {
+            if (players.TryGetValue(playerId, out Player player))
+            {
+                return player;
+            }
+            return null;
         }
     }
 }

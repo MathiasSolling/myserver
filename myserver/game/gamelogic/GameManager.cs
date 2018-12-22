@@ -59,18 +59,18 @@ namespace myserver.game
 
         public int AddNewPlayer(IPEndPoint ep)
         {
-            foreach (var player in gameState.players)
+            foreach (KeyValuePair<int, Player> entry in gameState.players)
             {
-                if (ep.Address.ToString() == player.Ep.Address.ToString() && ep.Port == player.Ep.Port)
+                if (ep.Address.ToString() == entry.Value.Ep.Address.ToString() && ep.Port == entry.Value.Ep.Port)
                 {
                     // Player already got an ID
-                    return player.PlayerId;
+                    return entry.Value.playerId;
                 }
             }
             int newPlayerId = gameState.GetNextUID();
-            Player p = new Player(newPlayerId, 0, 3, 0, 0, 0, 0, ep);
-            weaponService.CreateWeaponsForNewPlayer(p);
-            gameState.players.Add(p);
+            Player player = new Player(newPlayerId, 0, 3, 0, 0, 0, 0, ep);
+            weaponService.CreateWeaponsForNewPlayer(player);
+            gameState.players[newPlayerId] = player;
             return newPlayerId;
         }
 
@@ -102,30 +102,18 @@ namespace myserver.game
 
         public void BroadcastGameState()
         {
-            string constructedPlayerPositions = playerService.ConstructAllPlayerPostitions() + npcService.ConstructAllNpcPostitions();
+            string gameStateString = playerService.ConstructAllPlayerPostitions() + npcService.ConstructAllNpcPostitions();
             // Dont broadcast anything if there is nothing to broadcast
-            if (constructedPlayerPositions.Length != 0)
+            if (gameStateString.Length != 0)
             {
-                string playerPositions = "002" + constructedPlayerPositions;
-                Logger.Log("BroadcastGameState ===> " + playerPositions, ActivityLogEnum.NORMAL);
-                var dg = Encoding.ASCII.GetBytes(playerPositions);
-                foreach (var player in gameState.players)
+                gameStateString = "002" + gameStateString;
+                Logger.Log("BroadcastGameState ===> " + Encoding.ASCII.GetByteCount(gameStateString), ActivityLogEnum.NORMAL);
+                var dg = Encoding.ASCII.GetBytes(gameStateString);
+                foreach (KeyValuePair<int, Player> entry in gameState.players)
                 {
-                    gameState.udpClient.Send(dg, dg.Length, player.Ep);
+                    gameState.udpClient.Send(dg, dg.Length, entry.Value.Ep);
                 }
             }
-        }
-
-        public Player FindPlayerById(int playerId)
-        {
-            foreach (var player in gameState.players)
-            {
-                if (playerId == player.PlayerId)
-                {
-                    return player;
-                }
-            }
-            return null;
         }
     }
 }

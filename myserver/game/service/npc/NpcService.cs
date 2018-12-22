@@ -45,7 +45,8 @@ namespace myserver.game.service.npc
                     hostileNpcSpawnInterval -= 500;
                 }
 
-                gameState.zombies.Add(new Zombie(gameState.GetNextUID()));
+                int newZombieId = gameState.GetNextUID();
+                gameState.zombies[newZombieId] = new Zombie(newZombieId);
                 Logger.Log("New Zombie spawned", ActivityLogEnum.NORMAL);
             }
         }
@@ -53,8 +54,9 @@ namespace myserver.game.service.npc
         private void UpdateNpc(float deltaTime)
         {
             
-            foreach (var zombie in gameState.zombies)
+            foreach (KeyValuePair<int, Zombie> entry in gameState.zombies)
             {
+                var zombie = entry.Value;
                 if (zombie.dead) return;
                 zombie.UpdateNpcTarget(gameState.players);
                 zombie.MoveAndRotate(deltaTime);
@@ -68,9 +70,9 @@ namespace myserver.game.service.npc
         {
             string npcPositions = "";
 
-            foreach (var zombie in gameState.zombies)
+            foreach (KeyValuePair<int, Zombie> entry in gameState.zombies)
             {
-                String state = zombie.RetrieveNewState();
+                String state = entry.Value.RetrieveNewState();
                 if (state != null)
                 {
                     npcPositions += state;

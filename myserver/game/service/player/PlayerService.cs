@@ -1,5 +1,6 @@
 ﻿using myserver.game.activitylog;
 using myserver.game.gamelogic;
+using myserver.game.npc.zombie;
 using myserver.game.service.npc;
 using System;
 using System.Collections.Concurrent;
@@ -29,7 +30,7 @@ namespace myserver.game
                 float psaValue = entry.Value;
 
                 PlayerStateActionEnum psaEnum = (PlayerStateActionEnum)psaKey;
-                if (psaEnum != PlayerStateActionEnum.PackageSeqNum && psaEnum != PlayerStateActionEnum.PlayerId)
+                if (psaEnum != PlayerStateActionEnum.PackageSeqNum)
                 {
                     player.NewPsaKeyValue[psaKey] = psaValue;
                     switch (psaEnum)
@@ -113,13 +114,13 @@ namespace myserver.game
             Logger.Log("past 3", ActivityLogEnum.CRITICAL);
             if (shooter.ActiveWeapon.BulletsInMag <= 0) return;
             Logger.Log("past 4", ActivityLogEnum.CRITICAL);
-            if (shooter.PlayerId == targetId) return;
+            if (shooter.playerId == targetId) return;
             Logger.Log("past 5", ActivityLogEnum.CRITICAL);
 
             int damage = shooter.ActiveWeapon.WeaponType.Damage;
             shooter.DamageDealtToPlayers += damage;
 
-            bool targetDied = target.TakeDamage(damage, shooter.PlayerId);
+            bool targetDied = target.TakeDamage(damage, shooter.playerId);
             if (targetDied)
             {
                 shooter.Kills++;
@@ -127,30 +128,28 @@ namespace myserver.game
             
             shooter.ActiveWeapon.BulletsInMag = shooter.ActiveWeapon.BulletsInMag - 1;
 
-            Logger.Log("Player#" + shooter.PlayerId + " shot Player#" + targetId, ActivityLogEnum.NORMAL);
+            Logger.Log("Player#" + shooter.playerId + " shot Player#" + targetId, ActivityLogEnum.NORMAL);
         }
 
         public IKillable FindTargetById(int targetId)
         {
-            // TODO move this to more appropiate place
-            IKillable target = null;
-            foreach (var player in gameState.players)
+            if (gameState.players.TryGetValue(targetId, out Player player))
             {
-                if (player.PlayerId == targetId) return player;
+                return player;
             }
-            foreach (var zombie in gameState.zombies)
+            if (gameState.zombies.TryGetValue(targetId, out Zombie zombie))
             {
-                if (zombie.npcId == targetId) return zombie;
+                return zombie;
             }
-            return target;
+            return null;
         }
 
         public string ConstructAllPlayerPostitions()
         {
             string playerPositions = "";
-            foreach (var player in gameState.players)
+            foreach (KeyValuePair<int, Player> entry in gameState.players)
             {
-                playerPositions += player.RetrieveNewPlayerState();
+                playerPositions += entry.Value.RetrieveNewPlayerState();
             }
             return playerPositions;
         }

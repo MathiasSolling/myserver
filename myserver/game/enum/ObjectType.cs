@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 
 namespace myserver.game
 {
-    enum NpcTypeEnum
+    enum ObjectType
     {
         Unknown = 0,
+        Player,
         Zombie
     }
 }
