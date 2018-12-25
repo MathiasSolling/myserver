@@ -22,82 +22,88 @@ namespace myserver.game
             this.gameState = gameState;
         }
 
-        public void UpdatePlayer(Player player, Dictionary<int, float> actions)
+        public void UpdatePlayer(Player player, Dictionary<PlayerStateActionEnum, float> actions)
         {
-            foreach (KeyValuePair<int, float> entry in actions)
+            foreach (KeyValuePair<PlayerStateActionEnum, float> entry in actions)
             {
-                int psaKey = entry.Key;
+                bool addKeyValueToNewPsaKeyValue = true;
+                PlayerStateActionEnum psaEnum = entry.Key;
                 float psaValue = entry.Value;
-
-                PlayerStateActionEnum psaEnum = (PlayerStateActionEnum)psaKey;
-                if (psaEnum != PlayerStateActionEnum.PackageSeqNum)
+                
+                switch (psaEnum)
                 {
-                    player.NewPsaKeyValue[psaKey] = psaValue;
-                    switch (psaEnum)
-                    {
-                        case PlayerStateActionEnum.PosX:
-                            player.PositionX = psaValue;
-                            break;
+                    case PlayerStateActionEnum.PosX:
+                        player.PositionX = psaValue;
+                        break;
 
-                        case PlayerStateActionEnum.PosY:
-                            player.PositionY = psaValue;
-                            break;
+                    case PlayerStateActionEnum.PosY:
+                        player.PositionY = psaValue;
+                        break;
 
-                        case PlayerStateActionEnum.PosZ:
-                            player.PositionZ = psaValue;
-                            break;
+                    case PlayerStateActionEnum.PosZ:
+                        player.PositionZ = psaValue;
+                        break;
 
-                        case PlayerStateActionEnum.RotX:
-                            player.RotationX = (int)psaValue;
-                            break;
+                    case PlayerStateActionEnum.RotX:
+                        player.RotationX = (int)psaValue;
+                        break;
 
-                        case PlayerStateActionEnum.RotY:
-                            player.RotationY = (int)psaValue;
-                            break;
+                    case PlayerStateActionEnum.RotY:
+                        player.RotationY = (int)psaValue;
+                        break;
 
-                        case PlayerStateActionEnum.RotZ:
-                            player.RotationZ = (int)psaValue;
-                            break;
+                    case PlayerStateActionEnum.RotZ:
+                        player.RotationZ = (int)psaValue;
+                        break;
 
-                        case PlayerStateActionEnum.VelocityX:
-                            player.VelocityX = psaValue;
-                            break;
+                    case PlayerStateActionEnum.VelocityX:
+                        player.VelocityX = psaValue;
+                        break;
 
-                        case PlayerStateActionEnum.VelocityY:
-                            player.VelocityY = psaValue;
-                            break;
+                    case PlayerStateActionEnum.VelocityY:
+                        player.VelocityY = psaValue;
+                        break;
 
-                        case PlayerStateActionEnum.VelocityZ:
-                            player.VelocityZ = psaValue;
-                            break;
+                    case PlayerStateActionEnum.VelocityZ:
+                        player.VelocityZ = psaValue;
+                        break;
 
-                        case PlayerStateActionEnum.Jump:
-                            player.Jump = psaValue == 1;
-                            break;
+                    case PlayerStateActionEnum.Jump:
+                        player.Jump = psaValue == 1;
+                        break;
 
-                        case PlayerStateActionEnum.Shoot:
-                            player.Shoot = psaValue == 1;
-                            break;
+                    case PlayerStateActionEnum.Shoot:
+                        player.Shoot = psaValue == 1;
+                        break;
 
-                        case PlayerStateActionEnum.Aim:
-                            player.Aim = psaValue == 1;
-                            break;
+                    case PlayerStateActionEnum.Aim:
+                        player.Aim = psaValue == 1;
+                        break;
 
-                        case PlayerStateActionEnum.Run:
-                            player.Run = psaValue == 1;
-                            break;
+                    case PlayerStateActionEnum.Run:
+                        player.Run = psaValue == 1;
+                        break;
 
-                        case PlayerStateActionEnum.Crouch:
-                            player.Crouch = psaValue == 1;
-                            break;
+                    case PlayerStateActionEnum.Crouch:
+                        player.Crouch = psaValue == 1;
+                        break;
 
-                        case PlayerStateActionEnum.ShotPlayer:
-                            ShotPlayer(player, (int)psaValue);
-                            break;
+                    case PlayerStateActionEnum.ShotPlayer:
+                        ShotPlayer(player, (int)psaValue);
+                        break;
 
-                        default:
-                            break;
-                    }
+                    default:
+                        // Missing implementation of key given from player (Or player is cheating and sending custom keys)
+                        addKeyValueToNewPsaKeyValue = false;
+                        break;
+                }
+                if (addKeyValueToNewPsaKeyValue)
+                {
+                    player.NewPsaKeyValue[(int)psaEnum] = psaValue;
+                }
+                else
+                {
+                    Logger.Log("Missing implementation for key: " + psaEnum, player.playerId, ActivityLogEnum.WARNING);
                 }
             }
         }
@@ -105,7 +111,7 @@ namespace myserver.game
         public void ShotPlayer(Player shooter, int targetId)
         {
             IKillable target = FindTargetById(targetId);
-            
+
             if (target == null) return;
             Logger.Log("past 1", ActivityLogEnum.CRITICAL);
             if (shooter.Dead) return;
@@ -125,7 +131,7 @@ namespace myserver.game
             {
                 shooter.Kills++;
             }
-            
+
             shooter.ActiveWeapon.BulletsInMag = shooter.ActiveWeapon.BulletsInMag - 1;
 
             Logger.Log("Player#" + shooter.playerId + " shot Player#" + targetId, ActivityLogEnum.NORMAL);

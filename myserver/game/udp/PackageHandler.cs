@@ -36,10 +36,10 @@ namespace myserver.game.udp
             return packageArray;
         }
 
-        public bool GetPlayerStateInformation(string[] packageArray, Player player, out Dictionary<int, float> actions)
+        public bool GetPlayerStateInformation(string[] packageArray, Player player, out Dictionary<PlayerStateActionEnum, float> actions)
         {
             bool playerNeedsCorrection = false;
-            actions = new Dictionary<int, float>();
+            actions = new Dictionary<PlayerStateActionEnum, float>();
             foreach (var package in packageArray)
             {
                 string[] actionsArray = package.Split(',');
@@ -50,32 +50,30 @@ namespace myserver.game.udp
                 {
                     break;
                 }
-                PlayerStateActionEnum psa = (PlayerStateActionEnum)Int32.Parse(sequenceNumber[0]);
-                if (psa == PlayerStateActionEnum.PackageSeqNum)
+                else if (Int32.Parse(sequenceNumber[0]) != (int)PlayerStateActionEnum.PackageSeqNum)
                 {
-                    int receivedPackageSeqNum = Int32.Parse(sequenceNumber[1]);
-                    int expectedPackageSeqNum = player.PackageSeq + 1;
-                    if (receivedPackageSeqNum != expectedPackageSeqNum && receivedPackageSeqNum - 64 < expectedPackageSeqNum)
-                    {
-                        // If packageSeq isnt the next one then skip it to get the right order of the packages
-                        continue;
-                    }
-                    else if (receivedPackageSeqNum - 64 > expectedPackageSeqNum)
-                    {
-                        // player client is sending packages with seq number way higher than we expect from it. Means we have lost some packages from client
-                        // and probably need to correct it (rubberband)
-                        playerNeedsCorrection = true;
-                        break;
-                    }
-                    // Increment players package seq server side so it matches the package we got
-                    player.PackageSeq = receivedPackageSeqNum;
-                }
-                else
-                {
-                    Logger.Log("Malicious package!", ActivityLogEnum.CRITICAL);
                     break;
                 }
-                
+
+                // We know the value is packageSeqNumber
+                int receivedPackageSeqNum = Int32.Parse(sequenceNumber[1]);
+                int expectedPackageSeqNum = player.PackageSeq + 1;
+                if (receivedPackageSeqNum != expectedPackageSeqNum && receivedPackageSeqNum - 64 < expectedPackageSeqNum)
+                {
+                    // If packageSeq isnt the next one then skip it to get the right order of the packages
+                    continue;
+                }
+                else if (receivedPackageSeqNum - 64 > expectedPackageSeqNum)
+                {
+                    // player client is sending packages with seq number way higher than we expect from it. Means we have lost some packages from client
+                    // and probably need to correct it (rubberband)
+                    playerNeedsCorrection = true;
+                    break;
+                }
+                // Increment players package seq server side so it matches the package we got
+                player.PackageSeq = receivedPackageSeqNum;
+
+                // Validate actions and put them into dictionary
                 foreach (var action in actionsArray)
                 {
                     string[] actionKeyValue = action.Split(':');
@@ -83,7 +81,7 @@ namespace myserver.game.udp
                     {
                         continue;
                     }
-                    actions[psaKey] = psaValue;
+                    actions[(PlayerStateActionEnum) psaKey] = psaValue;
                 }
             }
             return playerNeedsCorrection;

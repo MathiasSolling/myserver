@@ -83,7 +83,7 @@ namespace myserver.game
 
             if (packageArray.Length == 0) { return returnString; }
 
-            bool playerNeedsCorrection = packageHandler.GetPlayerStateInformation(packageArray, player, out Dictionary<int, float> actions);
+            bool playerNeedsCorrection = packageHandler.GetPlayerStateInformation(packageArray, player, out Dictionary<PlayerStateActionEnum, float> actions);
             if (!playerNeedsCorrection)
             {
                 playerService.UpdatePlayer(player, actions);
