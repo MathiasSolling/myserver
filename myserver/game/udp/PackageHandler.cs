@@ -77,6 +77,12 @@ namespace myserver.game.udp
                 foreach (var action in actionsArray)
                 {
                     string[] actionKeyValue = action.Split(':');
+
+                    if (actionKeyValue.Length != 2)
+                    {
+                        continue;
+                    }
+
                     if (!Int32.TryParse(actionKeyValue[0], out int psaKey) || !float.TryParse(actionKeyValue[1], out float psaValue))
                     {
                         continue;

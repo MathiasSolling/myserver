@@ -27,6 +27,8 @@ namespace myserver.game
         RotY,
         RotZ,
 
+        ShootRotationX,
+
         // Booleans
         Jump,
         Shoot,

@@ -27,6 +27,8 @@ namespace myserver.game
         public float VelocityY { get; set; }
         public float VelocityZ { get; set; }
 
+        public float shootRotationX = 0f;
+
         public bool Jump { get; set; } = false;
         public bool Shoot { get; set; } = false;
         public bool Aim { get; set; } = false;
@@ -36,7 +38,8 @@ namespace myserver.game
 
         public bool Dead = false;
 
-        public int Health = 500;
+        public int maxHealth = 500;
+        public int health;
 
         public List<Weapon> Weapons = new List<Weapon>();
         public Weapon ActiveWeapon;
@@ -49,6 +52,9 @@ namespace myserver.game
         // Dictionary to hold new state and actions sent from the player client to then broadcast right away to all other clients
         public ConcurrentDictionary<int, float> NewPsaKeyValue = new ConcurrentDictionary<int, float>();
 
+        // Dictionary to hold history of player state
+        public ConcurrentDictionary<long, ConcurrentDictionary<int, float>> psaKeyValueHistory = new ConcurrentDictionary<long, ConcurrentDictionary<int, float>>();
+
         [JsonIgnore]
         public long LastTimeShotFiredInMillis { get; set; } = 0;
 
@@ -60,7 +66,7 @@ namespace myserver.game
 
         public Player()
         {
-
+            health = maxHealth;
         }
 
         public Player(int playerId, int posX, int posY, int posZ, int rotX, int rotY, int rotZ, IPEndPoint ep)
@@ -81,15 +87,15 @@ namespace myserver.game
         public bool TakeDamage(int damage, float attackerId)
         {
             if (Dead) return false;
-            Health -= damage;
-            if (Health <= 0)
+            health -= damage;
+            if (health <= 0)
             {
                 Dead = true;
                 AddNewPsaKeyValue(PlayerStateActionEnum.KilledBy, attackerId);
             }
             else
             {
-                AddNewPsaKeyValue(PlayerStateActionEnum.Health, Health);
+                AddNewPsaKeyValue(PlayerStateActionEnum.Health, HealthLeftInPercentages());
             }
             return Dead;
         }
@@ -99,16 +105,24 @@ namespace myserver.game
             string playerState = "";
             if (NewPsaKeyValue.Count != 0)
             {
-                AddNewPsaKeyValue(PlayerStateActionEnum.ObjectId, playerId);
-                AddNewPsaKeyValue(PlayerStateActionEnum.ObjectType, (int)ObjectType.Player);
+                playerState += ";";
+                playerState += (int)PlayerStateActionEnum.ObjectId + ":" + playerId;
+                playerState += "," + (int)PlayerStateActionEnum.ObjectType + ":" + (int)ObjectType.Player;
 
                 foreach (KeyValuePair<int, float> entry in NewPsaKeyValue)
                 {
                     playerState += "," + entry.Key + ":" + entry.Value.ToString("0.##");
                 }
             }
+            ArchiveStateBeforeClear(NewPsaKeyValue);
             NewPsaKeyValue.Clear();
             return playerState;
+        }
+
+        private void ArchiveStateBeforeClear(ConcurrentDictionary<int, float> actions)
+        {
+            long currTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+            psaKeyValueHistory[currTime] = actions;
         }
 
         public void AddNewPsaKeyValue(PlayerStateActionEnum playerStateActionEnum, float value)
@@ -118,6 +132,11 @@ namespace myserver.game
                 return;
             }
             NewPsaKeyValue[(int)playerStateActionEnum] = value;
+        }
+
+        public int HealthLeftInPercentages()
+        {
+            return health / maxHealth * 100;
         }
     }
 }

@@ -83,10 +83,10 @@ namespace myserver.game
 
             if (packageArray.Length == 0) { return returnString; }
 
-            bool playerNeedsCorrection = packageHandler.GetPlayerStateInformation(packageArray, player, out Dictionary<PlayerStateActionEnum, float> actions);
+            bool playerNeedsCorrection = packageHandler.GetPlayerStateInformation (packageArray, player, out Dictionary<PlayerStateActionEnum, float> actions);
             if (!playerNeedsCorrection)
             {
-                playerService.UpdatePlayer(player, actions);
+                playerService. UpdatePlayer(player, actions);
 
                 // send packageSeqNum that server has processed
                 returnString = "001;" + player.PackageSeq.ToString();
@@ -107,7 +107,7 @@ namespace myserver.game
             if (gameStateString.Length != 0)
             {
                 gameStateString = "002" + gameStateString;
-                Logger.Log("BroadcastGameState ===> " + Encoding.ASCII.GetByteCount(gameStateString), ActivityLogEnum.NORMAL);
+                Logger.Log("BroadcastGameState ===> " + gameStateString, ActivityLogEnum.NORMAL);
                 var dg = Encoding.ASCII.GetBytes(gameStateString);
                 foreach (KeyValuePair<int, Player> entry in gameState.players)
                 {

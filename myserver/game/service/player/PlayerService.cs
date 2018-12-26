@@ -68,6 +68,10 @@ namespace myserver.game
                         player.VelocityZ = psaValue;
                         break;
 
+                    case PlayerStateActionEnum.ShootRotationX:
+                        player.shootRotationX = psaValue;
+                        break;
+
                     case PlayerStateActionEnum.Jump:
                         player.Jump = psaValue == 1;
                         break;
@@ -101,7 +105,7 @@ namespace myserver.game
                 {
                     player.NewPsaKeyValue[(int)psaEnum] = psaValue;
                 }
-                else
+                else if (psaEnum != PlayerStateActionEnum.PackageSeqNum)
                 {
                     Logger.Log("Missing implementation for key: " + psaEnum, player.playerId, ActivityLogEnum.WARNING);
                 }

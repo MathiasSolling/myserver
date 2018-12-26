@@ -11,17 +11,18 @@ namespace myserver.game.npc.zombie
 {
     class Zombie : Npc, IKillable
     {
-        public float health = 200;
+        private int maxHealth = 200;
+        private int health;
         private int damage = 20;
         private int moveSpeed = 4;
 
-        private float attackRange = 1.5f;
+        private float attackRange = 2.5f;
         private float attacksPerSecond = 0.5f;
         private long lastTimeAttacked = 0;
 
         public Zombie(int npcId) : base(npcId, ObjectType.Zombie)
         {
-
+            health = maxHealth;
         }
 
         public void MoveAndRotate(float deltaTime)
@@ -41,12 +42,12 @@ namespace myserver.game.npc.zombie
                 // Only move if not in attack range 
                 position = position + (direction * moveSpeed * deltaTime);
                 AddNewNsaKeyValue(PlayerStateActionEnum.PosX, position.X);
-                AddNewNsaKeyValue(PlayerStateActionEnum.PosY, position.Y);
+                // AddNewNsaKeyValue(PlayerStateActionEnum.PosY, position.Y);
                 AddNewNsaKeyValue(PlayerStateActionEnum.PosZ, position.Z);
 
-                AddNewNsaKeyValue(PlayerStateActionEnum.VelocityX, velocity.X);
+                // AddNewNsaKeyValue(PlayerStateActionEnum.VelocityX, velocity.X);
                 // AddNewNsaKeyValue(PlayerStateActionEnum.VelocityY, velocity.Y);
-                AddNewNsaKeyValue(PlayerStateActionEnum.VelocityZ, velocity.Z);
+                // AddNewNsaKeyValue(PlayerStateActionEnum.VelocityZ, velocity.Z);
             }
             
             Vector3 rotAxis = Vector3.Cross(direction, newDirection);
@@ -60,9 +61,9 @@ namespace myserver.game.npc.zombie
 
             // TODO Above rotation calculations doesn't work
 
-            //AddNewNsaKeyValue(PlayerStateActionEnum.RotX, rotation.X);
-            //AddNewNsaKeyValue(PlayerStateActionEnum.RotY, rotation.Y);
-            //AddNewNsaKeyValue(PlayerStateActionEnum.RotZ, rotation.Z);
+            // AddNewNsaKeyValue(PlayerStateActionEnum.RotX, rotation.X);
+            // AddNewNsaKeyValue(PlayerStateActionEnum.RotY, rotation.Y);
+            // AddNewNsaKeyValue(PlayerStateActionEnum.RotZ, rotation.Z);
         }
 
         public void UpdateNpcTarget(ConcurrentDictionary<int, Player> players)
@@ -135,7 +136,7 @@ namespace myserver.game.npc.zombie
             }
             else
             {
-                AddNewNsaKeyValue(PlayerStateActionEnum.Health, health);
+                AddNewNsaKeyValue(PlayerStateActionEnum.Health, HealthLeftInPercentages(maxHealth, health));
             }
             return dead;
         }

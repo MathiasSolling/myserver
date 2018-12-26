@@ -35,15 +35,15 @@ namespace myserver.game.npc.zombie
             string npcState = "";
             if (NewNsaKeyValue.Count != 0)
             {
-                AddNewNsaKeyValue(PlayerStateActionEnum.ObjectId, npcId);
-                AddNewNsaKeyValue(PlayerStateActionEnum.ObjectType, (int) objectType);
+                npcState += ";";
+                npcState += (int)PlayerStateActionEnum.ObjectId + ":" + npcId;
+                npcState += "," + (int)PlayerStateActionEnum.ObjectType + ":" + (int)objectType;
 
                 foreach (KeyValuePair<int, float> entry in NewNsaKeyValue)
                 {
                     npcState += "," + entry.Key + ":" + entry.Value.ToString("0.##");
                 }
                 NewNsaKeyValue.Clear();
-                npcState = ";" + npcState;
             }
             return npcState;
         }
@@ -55,6 +55,11 @@ namespace myserver.game.npc.zombie
                 return;
             }
             NewNsaKeyValue[(int)playerStateActionEnum] = value;
+        }
+
+        protected int HealthLeftInPercentages(int maxHealth, int healthLeft)
+        {
+            return healthLeft / maxHealth * 100;
         }
     }
 }
