@@ -27,7 +27,6 @@ namespace myserver
         void listener_DataReceivedEvent(UdpClient sender, ReceivedDataArgs args)
         {
             string message = Encoding.ASCII.GetString(args.ReceivedBytes);
-            //Console.WriteLine("Received message from: " + args.IpAddress.ToString() + ", Port: " + args.Port.ToString() + ", Message: " + message);
 
             IPEndPoint ep = new IPEndPoint(args.IpAddress, args.Port);
             if (message.StartsWith("000"))

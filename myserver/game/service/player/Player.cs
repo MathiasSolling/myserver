@@ -121,8 +121,13 @@ namespace myserver.game
 
         private void ArchiveStateBeforeClear(ConcurrentDictionary<int, float> actions)
         {
+            ConcurrentDictionary<int, float> newDict = new ConcurrentDictionary<int, float>();
+            foreach (KeyValuePair<int, float> entry in actions)
+            {
+                newDict[entry.Key] = entry.Value;
+            }
             long currTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-            psaKeyValueHistory[currTime] = actions;
+            psaKeyValueHistory[currTime] = newDict;
         }
 
         public void AddNewPsaKeyValue(PlayerStateActionEnum playerStateActionEnum, float value)

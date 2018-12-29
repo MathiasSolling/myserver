@@ -17,7 +17,7 @@ namespace myserver.game.service.npc
         private GameState gameState;
 
         private long currentTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-        private long lastTimeHostileNpcSpawned = DateTimeOffset.Now.ToUnixTimeMilliseconds() - 12000;
+        private long lastTimeHostileNpcSpawned = DateTimeOffset.Now.ToUnixTimeMilliseconds() - 8000;
         private long hostileNpcSpawnInterval = 20000;
 
         public NpcService(GameState gameState)
@@ -33,7 +33,6 @@ namespace myserver.game.service.npc
 
         private void CheckToSpawnNpc()
         {
-            return;
             // Max 50 zombies with a maximum spawn-rate of 2 seconds
             currentTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             if (lastTimeHostileNpcSpawned + hostileNpcSpawnInterval < currentTime && gameState.zombies.Count < 50)

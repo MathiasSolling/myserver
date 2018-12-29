@@ -10,6 +10,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace myserver.game
@@ -21,11 +22,13 @@ namespace myserver.game
         private GameState gameState;
 
         private PlayerService playerService;
-        private WeaponService weaponService = new WeaponService();
+        private WeaponService weaponService;
         private NpcService npcService;
 
-        private MiscManager miscManager = new MiscManager();
+        private MiscManager miscManager;
         private PackageHandler packageHandler;
+
+        private readonly object addNewPlayerLock = new object();
 
         public GameManager(GameState gameState)
         {
@@ -34,8 +37,11 @@ namespace myserver.game
             playerService = new PlayerService(gameState);
             npcService = new NpcService(gameState);
             packageHandler = new PackageHandler(gameState);
-        }
 
+            weaponService = new WeaponService();
+            miscManager = new MiscManager();
+        }
+        
         public void DoGameLogic(float deltaTime)
         {
             npcService.Update(deltaTime);
@@ -56,22 +62,26 @@ namespace myserver.game
         {
             // Am I ever gonna do this? YES!
         }
-
+        
         public int AddNewPlayer(IPEndPoint ep)
         {
-            foreach (KeyValuePair<int, Player> entry in gameState.players)
+            lock (addNewPlayerLock)
             {
-                if (ep.Address.ToString() == entry.Value.Ep.Address.ToString() && ep.Port == entry.Value.Ep.Port)
+                foreach (KeyValuePair<int, Player> entry in gameState.players)
                 {
-                    // Player already got an ID
-                    return entry.Value.playerId;
+                    if (ep.Address.ToString() == entry.Value.Ep.Address.ToString() && ep.Port == entry.Value.Ep.Port)
+                    {
+                        // Player already got an ID
+                        return entry.Value.playerId;
+                    }
                 }
+
+                int newPlayerId = gameState.GetNextUID();
+                Player player = new Player(newPlayerId, 0, 3, 0, 0, 0, 0, ep);
+                weaponService.CreateWeaponsForNewPlayer(player);
+                gameState.players[newPlayerId] = player;
+                return newPlayerId;
             }
-            int newPlayerId = gameState.GetNextUID();
-            Player player = new Player(newPlayerId, 0, 3, 0, 0, 0, 0, ep);
-            weaponService.CreateWeaponsForNewPlayer(player);
-            gameState.players[newPlayerId] = player;
-            return newPlayerId;
         }
 
         public string HandlePlayerStateInformation(String message)
@@ -83,10 +93,10 @@ namespace myserver.game
 
             if (packageArray.Length == 0) { return returnString; }
 
-            bool playerNeedsCorrection = packageHandler.GetPlayerStateInformation (packageArray, player, out Dictionary<PlayerStateActionEnum, float> actions);
+            bool playerNeedsCorrection = packageHandler.GetPlayerStateInformation(packageArray, player, out Dictionary<PlayerStateActionEnum, float> actions);
             if (!playerNeedsCorrection)
             {
-                playerService. UpdatePlayer(player, actions);
+                playerService.UpdatePlayer(player, actions);
 
                 // send packageSeqNum that server has processed
                 returnString = "001;" + player.PackageSeq.ToString();

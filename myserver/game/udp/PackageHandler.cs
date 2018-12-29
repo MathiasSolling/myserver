@@ -3,6 +3,7 @@ using myserver.game.gamelogic;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -83,11 +84,11 @@ namespace myserver.game.udp
                         continue;
                     }
 
-                    if (!Int32.TryParse(actionKeyValue[0], out int psaKey) || !float.TryParse(actionKeyValue[1], out float psaValue))
+                    if (Int32.TryParse(actionKeyValue[0], out int psaKey) && 
+                        float.TryParse(actionKeyValue[1], NumberStyles.Float, CultureInfo.InvariantCulture.NumberFormat, out float psaValue))
                     {
-                        continue;
+                        actions[(PlayerStateActionEnum)psaKey] = psaValue;
                     }
-                    actions[(PlayerStateActionEnum) psaKey] = psaValue;
                 }
             }
             return playerNeedsCorrection;
