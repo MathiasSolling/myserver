@@ -1,6 +1,7 @@
 ﻿using myserver.game.activitylog;
 using myserver.game.gamelogic;
 using myserver.game.npc.zombie;
+using myserver.game.service.npc.zombie;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -14,15 +15,14 @@ namespace myserver.game.service.npc
     class NpcService
     {
         private static ActivityLog Logger = new ActivityLog("NpcService");
-        private GameState gameState;
 
-        private long currentTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-        private long lastTimeHostileNpcSpawned = DateTimeOffset.Now.ToUnixTimeMilliseconds() - 8000;
-        private long hostileNpcSpawnInterval = 20000;
+        private GameState gameState;
+        private ZombieService zombieService;
 
         public NpcService(GameState gameState)
         {
             this.gameState = gameState;
+            zombieService = new ZombieService(gameState);
         }
 
         public void Update(float deltaTime)
@@ -33,37 +33,13 @@ namespace myserver.game.service.npc
 
         private void CheckToSpawnNpc()
         {
-            // Max 50 zombies with a maximum spawn-rate of 2 seconds
-            currentTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-            if (lastTimeHostileNpcSpawned + hostileNpcSpawnInterval < currentTime && gameState.zombies.Count < 50)
-            {
-                lastTimeHostileNpcSpawned = currentTime;
-
-                // Increase spawn interval
-                if (hostileNpcSpawnInterval > 2000)
-                {
-                    hostileNpcSpawnInterval -= 500;
-                }
-
-                int newZombieId = gameState.GetNextUID();
-                gameState.zombies[newZombieId] = new Zombie(newZombieId);
-                Logger.Log("New Zombie spawned", ActivityLogEnum.NORMAL);
-            }
+            zombieService.CheckToSpawnZombie();
         }
 
         private void UpdateNpc(float deltaTime)
         {
-            foreach (KeyValuePair<int, Zombie> entry in gameState.zombies)
-            {
-                var zombie = entry.Value;
-                if (zombie.dead) continue;
-                zombie.UpdateNpcTarget(gameState.players);
-                zombie.MoveAndRotate(deltaTime);
-                zombie.AttackTarget();
-            }
+            zombieService.UpdateZombie(deltaTime);
         }
-
-        
 
         public String ConstructAllNpcPostitions()
         {

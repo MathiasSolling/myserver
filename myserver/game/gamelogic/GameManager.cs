@@ -99,13 +99,13 @@ namespace myserver.game
                 playerService.UpdatePlayer(player, actions);
 
                 // send packageSeqNum that server has processed
-                returnString = "001;" + player.PackageSeq.ToString();
+                returnString = "001;" + player.packageSeq.ToString();
             }
             else
             {
                 // send correction package to player because player sends packeages with too high seq number
                 // todo
-                returnString = "e001;2:" + player.PositionX + ",3:" + player.PositionY + ",4:" + player.PositionZ;
+                returnString = "e001;2:" + player.positionX + ",3:" + player.positionY + ",4:" + player.positionZ;
             }
             return returnString;
         }

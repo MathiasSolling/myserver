@@ -13,30 +13,30 @@ namespace myserver.game
 {
     class Player : IKillable
     {
-        public int playerId { get; set; }
+        public int playerId = 0;
 
-        public float PositionX { get; set; }
-        public float PositionY { get; set; }
-        public float PositionZ { get; set; }
+        public float positionX = 0;
+        public float positionY = 0;
+        public float positionZ = 0;
 
-        public int RotationX { get; set; }
-        public int RotationY { get; set; }
-        public int RotationZ { get; set; }
+        public int rotationX = 0;
+        public int rotationY = 0;
+        public int rotationZ = 0;
 
-        public float VelocityX { get; set; }
-        public float VelocityY { get; set; }
-        public float VelocityZ { get; set; }
+        public float velocityX = 0;
+        public float velocityY = 0;
+        public float velocityZ = 0;
 
         public float shootRotationX = 0f;
 
-        public bool Jump { get; set; } = false;
-        public bool Shoot { get; set; } = false;
-        public bool Aim { get; set; } = false;
-        public bool Run { get; set; } = false;
+        public bool jump = false;
+        public bool shoot = false;
+        public bool aim = false;
+        public bool run = false;
 
-        public bool Crouch { get; set; } = false;
+        public bool crouch = false;
 
-        public bool Dead = false;
+        public bool dead = false;
 
         public int maxHealth = 500;
         public int health;
@@ -44,10 +44,10 @@ namespace myserver.game
         public List<Weapon> Weapons = new List<Weapon>();
         public Weapon ActiveWeapon;
 
-        public int DamageDealtToNpc = 0;
-        public int DamageDealtToPlayers = 0;
+        public int damageDealtToNpc = 0;
+        public int damageDealtToPlayers = 0;
 
-        public int Kills = 0;
+        public int kills = 0;
 
         // Dictionary to hold new state and actions sent from the player client to then broadcast right away to all other clients
         public ConcurrentDictionary<int, float> NewPsaKeyValue = new ConcurrentDictionary<int, float>();
@@ -56,13 +56,15 @@ namespace myserver.game
         public ConcurrentDictionary<long, ConcurrentDictionary<int, float>> psaKeyValueHistory = new ConcurrentDictionary<long, ConcurrentDictionary<int, float>>();
 
         [JsonIgnore]
-        public long LastTimeShotFiredInMillis { get; set; } = 0;
+        public long lastTimeShotFiredInMillis = 0;
 
         [JsonIgnore]
-        public int PackageSeq { get; set; } = 1;
+        public int packageSeq = 1;
 
         [JsonIgnore]
         public IPEndPoint Ep { get; set; }
+
+        public long timeOfLoggedIn = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 
         public Player()
         {
@@ -73,31 +75,34 @@ namespace myserver.game
         {
             this.playerId = playerId;
 
-            this.PositionX = posX;
-            this.PositionY = posY;
-            this.PositionZ = posZ;
+            this.positionX = posX;
+            this.positionY = posY;
+            this.positionZ = posZ;
 
-            this.RotationX = rotX;
-            this.RotationY = rotY;
-            this.RotationZ = rotZ;
+            this.rotationX = rotX;
+            this.rotationY = rotY;
+            this.rotationZ = rotZ;
 
             this.Ep = ep;
+
+            // Store player's first position in history of actions
+            ArchiveStateBeforeClear();
         }
 
         public bool TakeDamage(int damage, float attackerId)
         {
-            if (Dead) return false;
+            if (dead) return false;
             health -= damage;
             if (health <= 0)
             {
-                Dead = true;
+                dead = true;
                 AddNewPsaKeyValue(PlayerStateActionEnum.KilledBy, attackerId);
             }
             else
             {
                 AddNewPsaKeyValue(PlayerStateActionEnum.Health, HealthLeftInPercentages());
             }
-            return Dead;
+            return dead;
         }
 
         public string RetrieveNewPlayerState()
@@ -114,18 +119,24 @@ namespace myserver.game
                     playerState += "," + entry.Key + ":" + entry.Value.ToString("0.##");
                 }
             }
-            ArchiveStateBeforeClear(NewPsaKeyValue);
+            ArchiveStateBeforeClear();
             NewPsaKeyValue.Clear();
             return playerState;
         }
 
-        private void ArchiveStateBeforeClear(ConcurrentDictionary<int, float> actions)
+        private void ArchiveStateBeforeClear()
         {
             ConcurrentDictionary<int, float> newDict = new ConcurrentDictionary<int, float>();
-            foreach (KeyValuePair<int, float> entry in actions)
+            foreach (KeyValuePair<int, float> entry in NewPsaKeyValue)
             {
                 newDict[entry.Key] = entry.Value;
             }
+
+            // Make sure player position is always archived even if not changed
+            newDict[(int)PlayerStateActionEnum.PosX] = positionX;
+            newDict[(int)PlayerStateActionEnum.PosY] = positionY;
+            newDict[(int)PlayerStateActionEnum.PosZ] = positionZ;
+
             long currTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             psaKeyValueHistory[currTime] = newDict;
         }

@@ -24,9 +24,10 @@ namespace myserver.game.npc.zombie
         // State and actions for the clients to know about the npcs
         public ConcurrentDictionary<int, float> NewNsaKeyValue = new ConcurrentDictionary<int, float>();
 
-        public Npc (int npcId, ObjectType objectType)
+        public Npc (int npcId, Vector3 startPos, ObjectType objectType)
         {
             this.npcId = npcId;
+            this.position = startPos;
             this.objectType = objectType;
         }
 

@@ -78,6 +78,7 @@
     <Compile Include="game\service\npc\NpcService.cs" />
     <Compile Include="game\service\npc\zombie\Zombie.cs" />
     <Compile Include="game\service\base\BaseSpawnArea.cs" />
+    <Compile Include="game\service\npc\zombie\ZombieService.cs" />
     <Compile Include="game\service\player\PlayerService.cs" />
     <Compile Include="game\gamelogic\GameManager.cs" />
     <Compile Include="game\Game.cs" />

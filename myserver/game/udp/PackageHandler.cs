@@ -58,7 +58,7 @@ namespace myserver.game.udp
 
                 // We know the value is packageSeqNumber
                 int receivedPackageSeqNum = Int32.Parse(sequenceNumber[1]);
-                int expectedPackageSeqNum = player.PackageSeq + 1;
+                int expectedPackageSeqNum = player.packageSeq + 1;
                 if (receivedPackageSeqNum != expectedPackageSeqNum && receivedPackageSeqNum - 64 < expectedPackageSeqNum)
                 {
                     // If packageSeq isnt the next one then skip it to get the right order of the packages
@@ -72,7 +72,7 @@ namespace myserver.game.udp
                     break;
                 }
                 // Increment players package seq server side so it matches the package we got
-                player.PackageSeq = receivedPackageSeqNum;
+                player.packageSeq = receivedPackageSeqNum;
 
                 // Validate actions and put them into dictionary
                 foreach (var action in actionsArray)

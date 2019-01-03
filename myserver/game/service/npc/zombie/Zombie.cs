@@ -20,7 +20,7 @@ namespace myserver.game.npc.zombie
         private float attacksPerSecond = 0.5f;
         private long lastTimeAttacked = 0;
 
-        public Zombie(int npcId) : base(npcId, ObjectType.Zombie)
+        public Zombie(int npcId, Vector3 startPos) : base(npcId, startPos, ObjectType.Zombie)
         {
             health = maxHealth;
         }
@@ -28,7 +28,7 @@ namespace myserver.game.npc.zombie
         public void MoveAndRotate(float deltaTime)
         {
             if (Target == null) return;
-            Vector3 targetPos = new Vector3(Target.PositionX, Target.PositionY, Target.PositionZ);
+            Vector3 targetPos = new Vector3(Target.positionX, Target.positionY, Target.positionZ);
             Vector3 newDir = targetPos - position;
             float distance = Vector3.Distance(position, targetPos);
             Vector3 newDirection = newDir / distance;
@@ -41,29 +41,12 @@ namespace myserver.game.npc.zombie
             {
                 // Only move if not in attack range 
                 position = position + (direction * moveSpeed * deltaTime);
+
                 AddNewNsaKeyValue(PlayerStateActionEnum.PosX, position.X);
-                // AddNewNsaKeyValue(PlayerStateActionEnum.PosY, position.Y);
+                AddNewNsaKeyValue(PlayerStateActionEnum.PosY, position.Y);
                 AddNewNsaKeyValue(PlayerStateActionEnum.PosZ, position.Z);
-
-                // AddNewNsaKeyValue(PlayerStateActionEnum.VelocityX, velocity.X);
-                // AddNewNsaKeyValue(PlayerStateActionEnum.VelocityY, velocity.Y);
-                // AddNewNsaKeyValue(PlayerStateActionEnum.VelocityZ, velocity.Z);
             }
-            
-            Vector3 rotAxis = Vector3.Cross(direction, newDirection);
-
-            double rotAngle = Math.Acos(Vector3.Dot(direction, newDirection));
-
-            Quaternion q = new Quaternion(rotAxis, (float)rotAngle);
-            rotation = rotation * q;
-
             direction = newDirection;
-
-            // TODO Above rotation calculations doesn't work
-
-            // AddNewNsaKeyValue(PlayerStateActionEnum.RotX, rotation.X);
-            // AddNewNsaKeyValue(PlayerStateActionEnum.RotY, rotation.Y);
-            // AddNewNsaKeyValue(PlayerStateActionEnum.RotZ, rotation.Z);
         }
 
         public void UpdateNpcTarget(ConcurrentDictionary<int, Player> players)
@@ -71,32 +54,32 @@ namespace myserver.game.npc.zombie
             Vector3 targetPos = new Vector3();
             if (Target != null)
             {
-                if (Target.Dead)
+                if (Target.dead)
                 {
                     Target = null;
                 }
                 else
                 {
-                    targetPos = new Vector3(Target.PositionX, Target.PositionY, Target.PositionZ);
+                    targetPos = new Vector3(Target.positionX, Target.positionY, Target.positionZ);
                 }
             }
 
             foreach (KeyValuePair<int, Player> entry in players)
             {
                 var player = entry.Value;
-                if (player.Dead) continue;
+                if (player.dead) continue;
                 if (Target == null)
                 {
                     Target = player;
-                    targetPos = new Vector3(Target.PositionX, Target.PositionY, Target.PositionZ);
+                    targetPos = new Vector3(Target.positionX, Target.positionY, Target.positionZ);
                     // AddNewNsaKeyValue(PlayerStateActionEnum.NpcTarget, Target.PlayerId);
                     continue;
                 }
-                Vector3 playerPos = new Vector3(player.PositionX, player.PositionY, player.PositionZ);
+                Vector3 playerPos = new Vector3(player.positionX, player.positionY, player.positionZ);
                 if (Vector3.Distance(playerPos, position) < Vector3.Distance(targetPos, position))
                 {
                     Target = player;
-                    targetPos = new Vector3(Target.PositionX, Target.PositionY, Target.PositionZ);
+                    targetPos = new Vector3(Target.positionX, Target.positionY, Target.positionZ);
                     // AddNewNsaKeyValue(PlayerStateActionEnum.NpcTarget, Target.PlayerId);
                 }
             }
@@ -111,13 +94,13 @@ namespace myserver.game.npc.zombie
                 return;
             }
             lastTimeAttacked = currentTime;
-            if (Target.Dead)
+            if (Target.dead)
             {
                 Target = null;
                 return;
             }
 
-            Vector3 targetPos = new Vector3(Target.PositionX, Target.PositionY, Target.PositionZ);
+            Vector3 targetPos = new Vector3(Target.positionX, Target.positionY, Target.positionZ);
             if (Vector3.Distance(targetPos, position) < attackRange)
             {
                 Target.TakeDamage(damage, npcId);

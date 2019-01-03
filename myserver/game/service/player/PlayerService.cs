@@ -33,39 +33,39 @@ namespace myserver.game
                 switch (psaEnum)
                 {
                     case PlayerStateActionEnum.PosX:
-                        player.PositionX = psaValue;
+                        player.positionX = psaValue;
                         break;
 
                     case PlayerStateActionEnum.PosY:
-                        player.PositionY = psaValue;
+                        player.positionY = psaValue;
                         break;
 
                     case PlayerStateActionEnum.PosZ:
-                        player.PositionZ = psaValue;
+                        player.positionZ = psaValue;
                         break;
 
                     case PlayerStateActionEnum.RotX:
-                        player.RotationX = (int)psaValue;
+                        player.rotationX = (int)psaValue;
                         break;
 
                     case PlayerStateActionEnum.RotY:
-                        player.RotationY = (int)psaValue;
+                        player.rotationY = (int)psaValue;
                         break;
 
                     case PlayerStateActionEnum.RotZ:
-                        player.RotationZ = (int)psaValue;
+                        player.rotationZ = (int)psaValue;
                         break;
 
                     case PlayerStateActionEnum.VelocityX:
-                        player.VelocityX = psaValue;
+                        player.velocityX = psaValue;
                         break;
 
                     case PlayerStateActionEnum.VelocityY:
-                        player.VelocityY = psaValue;
+                        player.velocityY = psaValue;
                         break;
 
                     case PlayerStateActionEnum.VelocityZ:
-                        player.VelocityZ = psaValue;
+                        player.velocityZ = psaValue;
                         break;
 
                     case PlayerStateActionEnum.ShootRotationX:
@@ -73,23 +73,23 @@ namespace myserver.game
                         break;
 
                     case PlayerStateActionEnum.Jump:
-                        player.Jump = psaValue == 1;
+                        player.jump = psaValue == 1;
                         break;
 
                     case PlayerStateActionEnum.Shoot:
-                        player.Shoot = psaValue == 1;
+                        player.shoot = psaValue == 1;
                         break;
 
                     case PlayerStateActionEnum.Aim:
-                        player.Aim = psaValue == 1;
+                        player.aim = psaValue == 1;
                         break;
 
                     case PlayerStateActionEnum.Run:
-                        player.Run = psaValue == 1;
+                        player.run = psaValue == 1;
                         break;
 
                     case PlayerStateActionEnum.Crouch:
-                        player.Crouch = psaValue == 1;
+                        player.crouch = psaValue == 1;
                         break;
 
                     case PlayerStateActionEnum.ShotPlayer:
@@ -118,7 +118,7 @@ namespace myserver.game
 
             if (target == null) return;
             Logger.Log("past 1", ActivityLogEnum.CRITICAL);
-            if (shooter.Dead) return;
+            if (shooter.dead) return;
             Logger.Log("past 2", ActivityLogEnum.CRITICAL);
             if (shooter.ActiveWeapon == null) return;
             Logger.Log("past 3", ActivityLogEnum.CRITICAL);
@@ -128,12 +128,12 @@ namespace myserver.game
             Logger.Log("past 5", ActivityLogEnum.CRITICAL);
 
             int damage = shooter.ActiveWeapon.WeaponType.Damage;
-            shooter.DamageDealtToPlayers += damage;
+            shooter.damageDealtToPlayers += damage;
 
             bool targetDied = target.TakeDamage(damage, shooter.playerId);
             if (targetDied)
             {
-                shooter.Kills++;
+                shooter.kills++;
             }
 
             shooter.ActiveWeapon.BulletsInMag = shooter.ActiveWeapon.BulletsInMag - 1;
