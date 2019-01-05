@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -37,6 +38,7 @@ namespace myserver.game
         public bool crouch = false;
 
         public bool dead = false;
+        public long timeOfDeath = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 
         public int maxHealth = 500;
         public int health;
@@ -66,11 +68,6 @@ namespace myserver.game
 
         public long timeOfLoggedIn = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 
-        public Player()
-        {
-            health = maxHealth;
-        }
-
         public Player(int playerId, int posX, int posY, int posZ, int rotX, int rotY, int rotZ, IPEndPoint ep)
         {
             this.playerId = playerId;
@@ -85,17 +82,28 @@ namespace myserver.game
 
             this.Ep = ep;
 
+            health = maxHealth;
+
             // Store player's first position in history of actions
             ArchiveStateBeforeClear();
         }
 
+        public bool IsDead()
+        {
+            return dead;
+        }
+
         public bool TakeDamage(int damage, float attackerId)
         {
-            if (dead) return false;
-            health -= damage;
+            if (dead)
+            {
+                return false;
+            }
+            health = health - damage;
             if (health <= 0)
             {
                 dead = true;
+                timeOfDeath = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                 AddNewPsaKeyValue(PlayerStateActionEnum.KilledBy, attackerId);
             }
             else
@@ -152,7 +160,26 @@ namespace myserver.game
 
         public int HealthLeftInPercentages()
         {
-            return health / maxHealth * 100;
+            decimal h = health;
+            decimal mh = maxHealth;
+            return (int)(h / mh * 100);
+        }
+
+        public void Respawn(Vector3 position)
+        {
+            dead = false;
+            AddNewPsaKeyValue(PlayerStateActionEnum.Respawn, 1);
+
+            timeOfDeath = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+
+            health = maxHealth;
+
+            positionX = position.X;
+            AddNewPsaKeyValue(PlayerStateActionEnum.PosX, positionX);
+            positionY = position.Y;
+            AddNewPsaKeyValue(PlayerStateActionEnum.PosY, positionY);
+            positionZ = position.Z;
+            AddNewPsaKeyValue(PlayerStateActionEnum.PosZ, positionZ);
         }
     }
 }

@@ -94,6 +94,7 @@ namespace myserver.game
 
                     case PlayerStateActionEnum.ShotPlayer:
                         ShotPlayer(player, (int)psaValue);
+                        addKeyValueToNewPsaKeyValue = false;
                         break;
 
                     default:
@@ -105,10 +106,6 @@ namespace myserver.game
                 {
                     player.NewPsaKeyValue[(int)psaEnum] = psaValue;
                 }
-                else if (psaEnum != PlayerStateActionEnum.PackageSeqNum)
-                {
-                    Logger.Log("Missing implementation for key: " + psaEnum, player.playerId, ActivityLogEnum.WARNING);
-                }
             }
         }
 
@@ -118,22 +115,26 @@ namespace myserver.game
 
             if (target == null) return;
             Logger.Log("past 1", ActivityLogEnum.CRITICAL);
-            if (shooter.dead) return;
+            if (target.IsDead()) return;
             Logger.Log("past 2", ActivityLogEnum.CRITICAL);
-            if (shooter.ActiveWeapon == null) return;
+            if (shooter.dead) return;
             Logger.Log("past 3", ActivityLogEnum.CRITICAL);
-            if (shooter.ActiveWeapon.BulletsInMag <= 0) return;
+            if (shooter.ActiveWeapon == null) return;
             Logger.Log("past 4", ActivityLogEnum.CRITICAL);
-            if (shooter.playerId == targetId) return;
+            if (shooter.ActiveWeapon.BulletsInMag <= 0) return;
             Logger.Log("past 5", ActivityLogEnum.CRITICAL);
+            if (shooter.playerId == targetId) return;
+            Logger.Log("past 6", ActivityLogEnum.CRITICAL);
 
             int damage = shooter.ActiveWeapon.WeaponType.Damage;
+            Logger.Log("Weapon " + shooter.ActiveWeapon.WeaponType.WeaponName + " did " + damage + " damage to target", ActivityLogEnum.CRITICAL);
             shooter.damageDealtToPlayers += damage;
 
             bool targetDied = target.TakeDamage(damage, shooter.playerId);
             if (targetDied)
             {
                 shooter.kills++;
+                shooter.AddNewPsaKeyValue(PlayerStateActionEnum.Kills, shooter.kills);
             }
 
             shooter.ActiveWeapon.BulletsInMag = shooter.ActiveWeapon.BulletsInMag - 1;
@@ -147,7 +148,7 @@ namespace myserver.game
             {
                 return player;
             }
-            if (gameState.zombies.TryGetValue(targetId, out Zombie zombie))
+            else if (gameState.zombies.TryGetValue(targetId, out Zombie zombie))
             {
                 return zombie;
             }

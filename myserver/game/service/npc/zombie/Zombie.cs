@@ -13,11 +13,11 @@ namespace myserver.game.npc.zombie
     {
         private int maxHealth = 200;
         private int health;
-        private int damage = 20;
+        private int damage = 10;
         private int moveSpeed = 4;
 
-        private float attackRange = 2.5f;
-        private float attacksPerSecond = 0.5f;
+        private float attackRange = 5f;
+        private double attacksPerSecond = 0.5;
         private long lastTimeAttacked = 0;
 
         public Zombie(int npcId, Vector3 startPos) : base(npcId, startPos, ObjectType.Zombie)
@@ -37,7 +37,7 @@ namespace myserver.game.npc.zombie
             Vector3 delta = newDir / (float)magnitude;
             Vector3 velocity = delta * moveSpeed * deltaTime;
 
-            if (Vector3.Distance(targetPos, position) > attackRange)
+            if (Vector3.Distance(targetPos, position) > attackRange - (attackRange / 2))
             {
                 // Only move if not in attack range 
                 position = position + (direction * moveSpeed * deltaTime);
@@ -72,7 +72,6 @@ namespace myserver.game.npc.zombie
                 {
                     Target = player;
                     targetPos = new Vector3(Target.positionX, Target.positionY, Target.positionZ);
-                    // AddNewNsaKeyValue(PlayerStateActionEnum.NpcTarget, Target.PlayerId);
                     continue;
                 }
                 Vector3 playerPos = new Vector3(player.positionX, player.positionY, player.positionZ);
@@ -80,16 +79,18 @@ namespace myserver.game.npc.zombie
                 {
                     Target = player;
                     targetPos = new Vector3(Target.positionX, Target.positionY, Target.positionZ);
-                    // AddNewNsaKeyValue(PlayerStateActionEnum.NpcTarget, Target.PlayerId);
                 }
             }
         }
 
         public void AttackTarget()
         {
-            if (Target == null) return;
             long currentTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-            if ((1000 / attacksPerSecond) + lastTimeAttacked > currentTime)
+            if (Target == null)
+            {
+                return;
+            }
+            else if ((1000 / attacksPerSecond) + lastTimeAttacked > currentTime)
             {
                 return;
             }
@@ -106,6 +107,11 @@ namespace myserver.game.npc.zombie
                 Target.TakeDamage(damage, npcId);
                 AddNewNsaKeyValue(PlayerStateActionEnum.Attack, 1);
             }
+        }
+
+        public bool IsDead()
+        {
+            return dead;
         }
 
         public bool TakeDamage(int damage, float attackerId)

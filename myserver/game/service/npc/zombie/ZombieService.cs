@@ -19,10 +19,10 @@ namespace myserver.game.service.npc.zombie
 
         private long currentTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
         private long lastTimeHostileZombieSpawned = DateTimeOffset.Now.ToUnixTimeMilliseconds() - 8000;
-        private long hostileZombieSpawnInterval = 20000;
+        private long hostileZombieSpawnInterval = 10000;
 
         // Time to go back to find the player position where we want to spawn the zombie
-        private long timeToGoBack = DateTimeOffset.Now.ToUnixTimeMilliseconds() - 5000;
+        private long timeToGoBack = 5000;
 
         public ZombieService(GameState gameState)
         {
@@ -36,13 +36,11 @@ namespace myserver.game.service.npc.zombie
             {
                 lastTimeHostileZombieSpawned = currentTime;
 
-                // decrease spawn interval
-                if (hostileZombieSpawnInterval > 2000)
-                {
-                    hostileZombieSpawnInterval -= 500;
-                }
-
                 Random rand = new Random();
+
+                // Set new random spawn interval
+                hostileZombieSpawnInterval = rand.Next(5000, 15000);
+                
                 int tries = 0;
                 bool done = false;
                 while (!done)
@@ -54,10 +52,10 @@ namespace myserver.game.service.npc.zombie
                         // Find random player to spawn zombie at
                         Player player = gameState.players.ElementAt(rand.Next(0, gameState.players.Count)).Value;
 
-                        if (player.timeOfLoggedIn < timeToGoBack)
+                        if (player.timeOfLoggedIn < currentTime - timeToGoBack)
                         {
                             // Find atleast X second old position of random player
-                            var dict = player.psaKeyValueHistory.Where(x => x.Key < timeToGoBack && x.Key > timeToGoBack - 2000);
+                            var dict = player.psaKeyValueHistory.Where(x => x.Key < currentTime - timeToGoBack && x.Key > currentTime - timeToGoBack - 2000);
                             if (dict.Any())
                             {
                                 // Reverse the dictionary and take first value, this is the closest one to the X seconds old position
@@ -71,7 +69,7 @@ namespace myserver.game.service.npc.zombie
                                     Vector3 randomPlayerRandomPosition = new Vector3(posX, posY, posZ);
                                     Vector3 randomPlayerCurrentPosition = new Vector3(player.positionX, player.positionY, player.positionZ);
                                     // Make sure we don't spawn zombie on top of player
-                                    if (Vector3.Distance(randomPlayerRandomPosition, randomPlayerCurrentPosition) > 4)
+                                    if (Vector3.Distance(randomPlayerRandomPosition, randomPlayerCurrentPosition) > 3)
                                     {
                                         // Spawn new zombie
                                         int newZombieId = gameState.GetNextUID();

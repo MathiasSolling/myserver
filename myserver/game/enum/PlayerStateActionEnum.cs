@@ -10,9 +10,9 @@ namespace myserver.game
     {
         Unknown = 0,
 
-        // Object id (Id of player, zombie etc.)
+        // 1: Object id (Id of player, zombie etc.)
         ObjectId,
-        // Object Type (Player, zombie etc.)
+        // 2: Object Type (Player, zombie etc.)
         ObjectType,
 
         PackageSeqNum,
@@ -41,21 +41,26 @@ namespace myserver.game
         VelocityY,
         VelocityZ,
 
+        // ID of active weapon
+        ActiveWeapon,
         // ID of picked up weapon
-        PickUpWeapon,
+        PickUpWeapon, // 20
         // ID of dropped weapon
-        DropWeapon,
-        // ID of weapon switched to
-        SwitchWeapon,
+        DropWeapon, 
 
         // Value is ID of the player who got shot (Client -> Server)
         ShotPlayer,
         // Value is ID of the player who got the kill (Server -> Client)
-        KilledBy, 
+        KilledBy,
         // Value is the amount of health the player has left (Server -> Client)
         Health,
+        // Boolean (Server -> Client)
+        Respawn,
 
         // Typically used if object only has 1 attack type (Server -> Client)
-        Attack
+        Attack,
+
+        // Value is amount of kills players have (Server -> Client)
+        Kills
     }
 }

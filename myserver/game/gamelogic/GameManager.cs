@@ -1,5 +1,6 @@
 ﻿using myserver.game.activitylog;
 using myserver.game.gamelogic;
+using myserver.game.service.gametype;
 using myserver.game.service.npc;
 using myserver.game.service.weapon;
 using myserver.game.udp;
@@ -28,6 +29,8 @@ namespace myserver.game
         private MiscManager miscManager;
         private PackageHandler packageHandler;
 
+        private DeathmatchService deathmatchService;
+
         private readonly object addNewPlayerLock = new object();
 
         public GameManager(GameState gameState)
@@ -37,6 +40,7 @@ namespace myserver.game
             playerService = new PlayerService(gameState);
             npcService = new NpcService(gameState);
             packageHandler = new PackageHandler(gameState);
+            deathmatchService = new DeathmatchService(gameState);
 
             weaponService = new WeaponService();
             miscManager = new MiscManager();
@@ -44,11 +48,17 @@ namespace myserver.game
         
         public void DoGameLogic(float deltaTime)
         {
+            // Respawns dead players
+            deathmatchService.ReviveDeadPlayers();
+
+            // Updates position, movement, target and atttack players
             npcService.Update(deltaTime);
 
+            // todo
             CalculateMovements(deltaTime);
             CalculatePhysics(deltaTime);
 
+            // todo - first make a ping system to see if player is connected
             miscManager.CheckForInactivity(gameState);
         }
 
@@ -89,9 +99,18 @@ namespace myserver.game
             string returnString = "-1";
 
             string[] packageArray = packageHandler.GetPlayer(message, out Player player);
-            if (player == null) return returnString;
-
-            if (packageArray.Length == 0) { return returnString; }
+            if (player == null)
+            {
+                return returnString;
+            }
+            else if (player.dead)
+            {
+                return returnString;
+            }
+            else if (packageArray.Length == 0)
+            {
+                return returnString;
+            }
 
             bool playerNeedsCorrection = packageHandler.GetPlayerStateInformation(packageArray, player, out Dictionary<PlayerStateActionEnum, float> actions);
             if (!playerNeedsCorrection)

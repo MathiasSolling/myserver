@@ -73,6 +73,8 @@
     <Compile Include="game\enum\PlayerStateActionEnum.cs" />
     <Compile Include="game\gamelogic\GameState.cs" />
     <Compile Include="game\gamelogic\MiscManager.cs" />
+    <Compile Include="game\service\gametype\deathmatch\DeathmatchService.cs" />
+    <Compile Include="game\service\gametype\deathmatch\PlayerSpawnArea.cs" />
     <Compile Include="game\service\npc\IKillable.cs" />
     <Compile Include="game\service\npc\Npc.cs" />
     <Compile Include="game\service\npc\NpcService.cs" />

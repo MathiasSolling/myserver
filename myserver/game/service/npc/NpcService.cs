@@ -33,6 +33,7 @@ namespace myserver.game.service.npc
 
         private void CheckToSpawnNpc()
         {
+            return;
             zombieService.CheckToSpawnZombie();
         }
 

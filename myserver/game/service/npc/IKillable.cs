@@ -8,6 +8,7 @@ namespace myserver.game.service.npc
 {
     interface IKillable
     {
+        bool IsDead();
         bool TakeDamage(int damage, float attackerId);
     }
 }

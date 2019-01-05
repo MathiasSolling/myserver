@@ -60,7 +60,7 @@ namespace myserver.game.npc.zombie
 
         protected int HealthLeftInPercentages(int maxHealth, int healthLeft)
         {
-            return healthLeft / maxHealth * 100;
+            return (healthLeft / maxHealth) * 100;
         }
     }
 }
