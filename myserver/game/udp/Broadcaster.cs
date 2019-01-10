@@ -13,8 +13,8 @@ namespace myserver.game.udp
         private static ActivityLog Logger = new ActivityLog("Broadcaster");
         private GameManager gameManager;
         
-        // Usally 50 which is 20 times a second, for development 2000 is good which is once every 2 seconds
-        private long ticks = 30;
+        // Broadcast count
+        private long ticks = 60;
 
         private long timeLastIterationInMillis = DateTimeOffset.Now.ToUnixTimeMilliseconds();
         private long timeStartedCountingTicksInMillis = DateTimeOffset.Now.ToUnixTimeMilliseconds();
@@ -46,7 +46,7 @@ namespace myserver.game.udp
                     // If more than 1000ms (1 sec) has passed since starting tickCount - then print and reset
                     if (timeNowInMillis - 1000 > timeStartedCountingTicksInMillis)
                     {
-                        Logger.Log("Broadcast count: " + broadcastCount, ActivityLogEnum.NORMAL);
+                        // Logger.Log("Broadcast count: " + broadcastCount, ActivityLogEnum.NORMAL);
                         broadcastCount = 1;
                         timeStartedCountingTicksInMillis = timeNowInMillis;
                     }

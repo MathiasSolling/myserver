@@ -73,7 +73,7 @@ namespace myserver.game
             // Am I ever gonna do this? YES!
         }
         
-        public int AddNewPlayer(IPEndPoint ep)
+        public int AddNewPlayer(IPEndPoint ep, string userName)
         {
             lock (addNewPlayerLock)
             {
@@ -87,7 +87,8 @@ namespace myserver.game
                 }
 
                 int newPlayerId = gameState.GetNextUID();
-                Player player = new Player(newPlayerId, 0, 3, 0, 0, 0, 0, ep);
+                Vector3 randomSpawnPosition = deathmatchService.GetRandomSpawnPosition();
+                Player player = new Player(newPlayerId, userName, randomSpawnPosition, 0, 0, 0, ep);
                 weaponService.CreateWeaponsForNewPlayer(player);
                 gameState.players[newPlayerId] = player;
                 return newPlayerId;

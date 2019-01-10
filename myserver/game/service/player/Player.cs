@@ -16,13 +16,15 @@ namespace myserver.game
     {
         public int playerId = 0;
 
+        public string userName = "";
+
         public float positionX = 0;
         public float positionY = 0;
         public float positionZ = 0;
 
-        public int rotationX = 0;
-        public int rotationY = 0;
-        public int rotationZ = 0;
+        public float rotationX = 0;
+        public float rotationY = 0;
+        public float rotationZ = 0;
 
         public float velocityX = 0;
         public float velocityY = 0;
@@ -68,13 +70,12 @@ namespace myserver.game
 
         public long timeOfLoggedIn = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 
-        public Player(int playerId, int posX, int posY, int posZ, int rotX, int rotY, int rotZ, IPEndPoint ep)
+        public Player(int playerId, string userName, Vector3 position, int rotX, int rotY, int rotZ, IPEndPoint ep)
         {
             this.playerId = playerId;
+            this.userName = userName;
 
-            this.positionX = posX;
-            this.positionY = posY;
-            this.positionZ = posZ;
+            SetPosition(position);
 
             this.rotationX = rotX;
             this.rotationY = rotY;
@@ -103,8 +104,17 @@ namespace myserver.game
             if (health <= 0)
             {
                 dead = true;
+                // Server won't accept packages from dead players
                 timeOfDeath = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                 AddNewPsaKeyValue(PlayerStateActionEnum.KilledBy, attackerId);
+
+                // Make sure dead enemies doesn't move and other stuff
+                AddNewPsaKeyValue(PlayerStateActionEnum.VelocityX, 0);
+                AddNewPsaKeyValue(PlayerStateActionEnum.VelocityY, 0);
+                AddNewPsaKeyValue(PlayerStateActionEnum.VelocityZ, 0);
+                AddNewPsaKeyValue(PlayerStateActionEnum.Shoot, 0);
+                AddNewPsaKeyValue(PlayerStateActionEnum.Aim, 0);
+                AddNewPsaKeyValue(PlayerStateActionEnum.Run, 0);
             }
             else
             {
@@ -147,6 +157,17 @@ namespace myserver.game
 
             long currTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             psaKeyValueHistory[currTime] = newDict;
+
+            // Remove old items from history
+            // TODO - this is called too often - make it once a second
+            // long tenSecondsAgo = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+            // foreach (var item in psaKeyValueHistory)
+            // {
+            // if (item.Key < tenSecondsAgo)
+            // {
+            // psaKeyValueHistory.TryRemove(item.Key, out ConcurrentDictionary<int, float> value);
+            // }
+            // }
         }
 
         public void AddNewPsaKeyValue(PlayerStateActionEnum playerStateActionEnum, float value)
@@ -173,7 +194,13 @@ namespace myserver.game
             timeOfDeath = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 
             health = maxHealth;
+            AddNewPsaKeyValue(PlayerStateActionEnum.Health, HealthLeftInPercentages());
 
+            SetPosition(position);
+        }
+
+        public void SetPosition(Vector3 position)
+        {
             positionX = position.X;
             AddNewPsaKeyValue(PlayerStateActionEnum.PosX, positionX);
             positionY = position.Y;

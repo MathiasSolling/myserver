@@ -45,15 +45,15 @@ namespace myserver.game
                         break;
 
                     case PlayerStateActionEnum.RotX:
-                        player.rotationX = (int)psaValue;
+                        player.rotationX = psaValue;
                         break;
 
                     case PlayerStateActionEnum.RotY:
-                        player.rotationY = (int)psaValue;
+                        player.rotationY = psaValue;
                         break;
 
                     case PlayerStateActionEnum.RotZ:
-                        player.rotationZ = (int)psaValue;
+                        player.rotationZ = psaValue;
                         break;
 
                     case PlayerStateActionEnum.VelocityX:

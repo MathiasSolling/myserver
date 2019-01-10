@@ -31,8 +31,11 @@ namespace myserver
             IPEndPoint ep = new IPEndPoint(args.IpAddress, args.Port);
             if (message.StartsWith("000"))
             {
+                string[] messageSplit = message.Split(';');
+                if (messageSplit.Length != 2) return;
+                string userName = messageSplit[1];
                 // New client needs an ID
-                int playerId = gameManager.AddNewPlayer(ep);
+                int playerId = gameManager.AddNewPlayer(ep, userName);
                 // todo if we save stats for next login we can pass saved player coords back here
                 Logger.Log("New player with id " + playerId + " and EP " + ep.Address + ":" + ep.Port, ActivityLogEnum.NORMAL);
                 var dg = Encoding.ASCII.GetBytes("000;" + playerId);

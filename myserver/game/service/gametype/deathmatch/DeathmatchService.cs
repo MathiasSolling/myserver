@@ -3,6 +3,7 @@ using myserver.game.service.gametype.deathmatch;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -17,7 +18,7 @@ namespace myserver.game.service.gametype
 
         private List<PlayerSpawnArea> playersSpawns = new List<PlayerSpawnArea>();
 
-        private long timeToRespawn = 10000;
+        private long timeToRespawn = 5000;
 
         public DeathmatchService(GameState gameState)
         {
@@ -29,6 +30,10 @@ namespace myserver.game.service.gametype
         {
             playersSpawns.Add(new PlayerSpawnArea(new Point(-8, 34), new Point(-7.5, 35), 6.1f, rand));
             playersSpawns.Add(new PlayerSpawnArea(new Point(38, 15), new Point(38.5, 14.5), 6.1f, rand));
+
+            playersSpawns.Add(new PlayerSpawnArea(new Point(-11, 20), new Point(-14, 21), 0.1f, rand));
+            playersSpawns.Add(new PlayerSpawnArea(new Point(-7.3, 5.1), new Point(-7.3, 5.1), 6.1f, rand));
+            playersSpawns.Add(new PlayerSpawnArea(new Point(12.4, -10.8), new Point(12.4, -10.8), 6.1f, rand));
         }
 
         public void ReviveDeadPlayers()
@@ -39,10 +44,14 @@ namespace myserver.game.service.gametype
                 var player = entry.Value;
                 if (player.dead && player.timeOfDeath + timeToRespawn < currentTime)
                 {
-                    PlayerSpawnArea psa = playersSpawns.ElementAt(rand.Next(0, playersSpawns.Count));
-                    player.Respawn(psa.GetRandomPosInArea());
+                    player.Respawn(GetRandomSpawnPosition());
                 }
             }
+        }
+
+        public Vector3 GetRandomSpawnPosition()
+        {
+            return playersSpawns.ElementAt(rand.Next(0, playersSpawns.Count)).GetRandomPosInArea();
         }
 
     }
