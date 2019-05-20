@@ -37,14 +37,15 @@ namespace myserver.game.npc.zombie
             Vector3 delta = newDir / (float)magnitude;
             Vector3 velocity = delta * moveSpeed * deltaTime;
 
-            if (Vector3.Distance(targetPos, position) > attackRange - (attackRange / 2))
+            // Only move if not in attack range
+            if (Vector3.Distance(targetPos, position) > attackRange / 2)
             {
-                // Only move if not in attack range 
                 position = position + (direction * moveSpeed * deltaTime);
 
                 AddNewNsaKeyValue(PlayerStateActionEnum.PosX, position.X);
                 AddNewNsaKeyValue(PlayerStateActionEnum.PosY, position.Y);
                 AddNewNsaKeyValue(PlayerStateActionEnum.PosZ, position.Z);
+                AddNewNsaKeyValue(PlayerStateActionEnum.TargetId, Target.playerId);
             }
             direction = newDirection;
         }
@@ -57,6 +58,7 @@ namespace myserver.game.npc.zombie
                 if (Target.dead)
                 {
                     Target = null;
+                    AddNewNsaKeyValue(PlayerStateActionEnum.TargetId, -1);
                 }
                 else
                 {

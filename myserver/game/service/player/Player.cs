@@ -189,7 +189,6 @@ namespace myserver.game
         public void Respawn(Vector3 position)
         {
             dead = false;
-            AddNewPsaKeyValue(PlayerStateActionEnum.Respawn, 1);
 
             timeOfDeath = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 
@@ -197,6 +196,9 @@ namespace myserver.game
             AddNewPsaKeyValue(PlayerStateActionEnum.Health, HealthLeftInPercentages());
 
             SetPosition(position);
+
+            // Respawn as the last value
+            AddNewPsaKeyValue(PlayerStateActionEnum.Respawn, 1);
         }
 
         public void SetPosition(Vector3 position)

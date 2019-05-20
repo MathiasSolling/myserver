@@ -60,6 +60,9 @@ namespace myserver.game
         // Typically used if object only has 1 attack type (Server -> Client)
         Attack,
 
+        // Id of the object which are targeted (Server -> Client)
+        TargetId,
+
         // Value is amount of kills players have (Server -> Client)
         Kills
     }
