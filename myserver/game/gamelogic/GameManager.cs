@@ -33,6 +33,8 @@ namespace myserver.game
 
         private readonly object addNewPlayerLock = new object();
 
+        private bool enableNpcs = false;
+
         public GameManager(GameState gameState)
         {
             this.gameState = gameState;
@@ -52,7 +54,10 @@ namespace myserver.game
             deathmatchService.ReviveDeadPlayers();
 
             // Updates position, movement, target and atttack players
-            npcService.Update(deltaTime);
+            if (enableNpcs)
+            {
+                npcService.Update(deltaTime);
+            }
 
             // todo
             CalculateMovements(deltaTime);

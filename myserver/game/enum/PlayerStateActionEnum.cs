@@ -64,6 +64,8 @@ namespace myserver.game
         TargetId,
 
         // Value is amount of kills players have (Server -> Client)
-        Kills
+        Kills,
+
+        Disconnected
     }
 }
